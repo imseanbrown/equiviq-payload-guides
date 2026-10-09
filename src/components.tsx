@@ -6,6 +6,14 @@ import type { PublicGuide, PublicGuideSummary } from './server'
 
 const calloutKinds = new Set(['NOTE', 'INFO', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION'])
 
+// Older Equiviq editor versions stored the callout heading as bold text inside
+// a quote. Normalize that source at render time so published snapshots and
+// newly authored callouts use the same presentation without rewriting history.
+export function normalizeGuideCallouts(markdown: string): string {
+  return markdown.replace(/^(\s*>\s*)(?:\*\*|__)(NOTE|INFO|TIP|IMPORTANT|WARNING|CAUTION)(?:\*\*|__)(?:\s|\u00a0)*$/gim,
+    (_line, quote: string, kind: string) => `${quote}[!${kind.toUpperCase()}]`)
+}
+
 function GuideBlockquote({ children, style = 'equiviq' }: { children?: ReactNode; style?: 'equiviq' | 'theme' }) {
   const paragraphs = Children.toArray(children).filter((part) => typeof part !== 'string' || part.trim())
   const first = paragraphs[0]
@@ -17,9 +25,7 @@ function GuideBlockquote({ children, style = 'equiviq' }: { children?: ReactNode
   const kind = marker[1].toUpperCase()
   const remainder = firstText.slice(marker[0].length).trim()
   return <blockquote className={`equiviq-guide-callout equiviq-guide-callout-${kind.toLowerCase()} ${style === 'theme' ? 'equiviq-guide-callout-theme' : ''}`}>
-    {style === 'equiviq' && <span className="equiviq-guide-callout-icon" aria-hidden="true">
-      {kind === 'TIP' ? '✦' : kind === 'IMPORTANT' || kind === 'CAUTION' ? '☞' : kind === 'WARNING' ? '!' : 'i'}
-    </span>}
+    {style === 'equiviq' && <span className="equiviq-guide-callout-icon" aria-hidden="true"><span className={`equiviq-guide-callout-icon-${kind === 'TIP' ? 'lightbulb' : kind === 'IMPORTANT' || kind === 'CAUTION' ? 'hand-right' : kind === 'WARNING' ? 'warning' : 'pin'}`} /></span>}
     <div className="equiviq-guide-callout-content">
       <p className="equiviq-guide-callout-label">{kind}</p>
       {(remainder || firstParts.length > 1) && <p>{remainder}{firstParts.slice(1)}</p>}
@@ -118,7 +124,7 @@ export function GuideArticle({ article, basePath, canonicalURL, settings }: { ar
               const safe = match ? `/guide-media/${article.id}/${match[1]}` : source
               return safe ? <img src={safe} alt={alt || ''} loading="lazy" /> : null
             },
-          }}>{section.markdown}</ReactMarkdown>
+          }}>{normalizeGuideCallouts(section.markdown)}</ReactMarkdown>
         </section>)}
       </div>
     </article>

@@ -40,7 +40,12 @@
 .equiviq-guide-section blockquote.equiviq-guide-callout-tip{--callout-color:#56812a}
 .equiviq-guide-section blockquote.equiviq-guide-callout-important,.equiviq-guide-section blockquote.equiviq-guide-callout-caution{--callout-color:#937000}
 .equiviq-guide-section blockquote.equiviq-guide-callout-warning{--callout-color:#c84b4c}
-.equiviq-guide-callout-icon{display:grid;flex:0 0 3.5rem;place-items:center;width:3.5rem;aspect-ratio:1;border-radius:50%;background:color-mix(in srgb,var(--callout-color) 16%,#fff);color:var(--callout-color);font-size:2rem;font-weight:800;line-height:1}
+.equiviq-guide-callout-icon{display:grid;flex:0 0 clamp(3rem,5vw,4.5rem);place-items:center;width:clamp(3rem,5vw,4.5rem);aspect-ratio:1;border-radius:50%;background:color-mix(in srgb,var(--callout-color) 16%,#fff)}
+.equiviq-guide-callout-icon>span{display:block;width:62%;height:62%;background:var(--callout-color);-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
+.equiviq-guide-callout-icon-pin{-webkit-mask-image:url('/callouts/callout-icon-pin.svg');mask-image:url('/callouts/callout-icon-pin.svg')}
+.equiviq-guide-callout-icon-lightbulb{-webkit-mask-image:url('/callouts/callout-icon-lightbulb.svg');mask-image:url('/callouts/callout-icon-lightbulb.svg')}
+.equiviq-guide-callout-icon-hand-right{-webkit-mask-image:url('/callouts/callout-icon-hand-right.svg');mask-image:url('/callouts/callout-icon-hand-right.svg')}
+.equiviq-guide-callout-icon-warning{-webkit-mask-image:url('/callouts/callout-icon-warning.svg');mask-image:url('/callouts/callout-icon-warning.svg')}
 .equiviq-guide-callout-content{flex:1;min-width:0}
 .equiviq-guide-section .equiviq-guide-callout-label{margin:0 0 .2rem;color:var(--callout-color);font-size:1.2rem;font-weight:800;line-height:1.1;text-transform:uppercase}
 .equiviq-guide-section .equiviq-guide-callout-content>:not(.equiviq-guide-callout-label){margin:0;color:#1f2a40;font-size:1rem;font-weight:700;line-height:1.4}
