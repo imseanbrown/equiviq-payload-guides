@@ -1,13 +1,13 @@
-import 'server-only'
-
-import { normalizeBasePath, type EquiviqGuidesOptions } from './plugin'
+import type { EquiviqGuidesOptions } from './plugin'
 
 export type PublicGuideSummary = {
   id: string
   document_number: string
   title: string
   updated_at: string
-  permalink: string
+  slug: string
+  /** Present only in Equiviq 0.1.0 responses during a rolling upgrade. */
+  permalink?: string
 }
 
 export type PublicGuide = PublicGuideSummary & {
@@ -33,14 +33,6 @@ const guideSlug = /^[a-z0-9-]{38,200}$/
 const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i
 
 export function createGuideClient(options: EquiviqGuidesOptions) {
-  const basePath = normalizeBasePath(options.basePath)
-
-  function guideRouteSuffix(segments: string[]): string[] | null {
-    const prefix = basePath.split('/').filter(Boolean)
-    if (segments.length < prefix.length || prefix.some((part, index) => segments[index] !== part)) return null
-    return segments.slice(prefix.length)
-  }
-
   function configuration(): { url: URL; key: string } | null {
     const rawURL = process.env[options.apiUrlEnv]
     const key = process.env[options.apiKeyEnv]
@@ -75,14 +67,20 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
 
   async function listGuides(search = ''): Promise<PublicGuideSummary[] | null> {
     const query = search.trim().slice(0, 120)
-    const result = await request<{ guides: PublicGuideSummary[] }>('', query)
-    return result && Array.isArray(result.guides) ? result.guides : null
+    const result = await request<{ guides: PublicGuideSummary[]; search_applied?: boolean }>('', query)
+    const items = result && Array.isArray(result.guides) ? result.guides.map((guide) => ({
+      ...guide, slug: guide.slug || guide.permalink?.split('/').pop() || '',
+    })).filter((guide) => guideSlug.test(guide.slug)) : null
+    return items && query && !result?.search_applied
+      ? items.filter((guide) => guide.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+      : items
   }
 
   async function getGuide(slug: string): Promise<PublicGuide | null> {
     if (!guideSlug.test(slug)) return null
     const article = await request<PublicGuide>(encodeURIComponent(slug))
-    return article?.visibility === 'Publicly Available' && Array.isArray(article.sections) ? article : null
+    return article?.visibility === 'Publicly Available' && Array.isArray(article.sections)
+      ? { ...article, slug: article.slug || article.permalink?.split('/').pop() || '' } : null
   }
 
   async function getImage(article: string, image: string): Promise<Response | null> {
@@ -104,5 +102,5 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
     }
   }
 
-  return { basePath, guideRouteSuffix, listGuides, getGuide, getImage }
+  return { listGuides, getGuide, getImage }
 }

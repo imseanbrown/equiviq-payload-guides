@@ -23,11 +23,11 @@ function faqPairs(article: PublicGuide): { question: string; answer: string }[] 
   return pairs
 }
 
-export function GuideIndex({ guides, query, basePath }: { guides: PublicGuideSummary[]; query: string; basePath: string }) {
-  return <main className="equiviq-guide-shell">
+export function GuideIndex({ guides, query, basePath, heading = 'Guides & Resources' }: { guides: PublicGuideSummary[]; query: string; basePath: string; heading?: string }) {
+  return <div className="equiviq-guide-shell">
     <section className="equiviq-guide-card equiviq-guide-index">
       <p className="equiviq-guide-eyebrow">Equiviq Knowledge</p>
-      <h1>Guides &amp; Resources</h1>
+      <h1>{heading}</h1>
       <p className="equiviq-guide-intro">Search publicly available guides from Equiviq.</p>
       <form action={basePath} method="get" role="search" className="equiviq-guide-search">
         <label htmlFor="equiviq-guide-query">Search guides</label>
@@ -35,13 +35,13 @@ export function GuideIndex({ guides, query, basePath }: { guides: PublicGuideSum
       </form>
       {query && <div className="equiviq-guide-result-heading"><h2>{guides.length ? `Results for “${query}”` : `No results for “${query}”`}</h2><a href={basePath}>Clear search</a></div>}
       {guides.length ? <ul className="equiviq-guide-list">{guides.map((guide) =>
-        <li key={guide.id}><a href={guide.permalink}><strong>{guide.title}</strong><span>{guide.document_number} <span aria-hidden="true">·</span> Updated {date(guide.updated_at)}</span></a></li>,
+        <li key={guide.id}><a href={`${basePath}/${guide.slug}`}><strong>{guide.title}</strong><span>{guide.document_number} <span aria-hidden="true">·</span> Updated {date(guide.updated_at)}</span></a></li>,
       )}</ul> : <p className="equiviq-guide-empty">{query ? 'Try another term or browse all guides.' : 'No public guides are available yet.'}</p>}
     </section>
-  </main>
+  </div>
 }
 
-export function GuideArticle({ article, basePath }: { article: PublicGuide; basePath: string }) {
+export function GuideArticle({ article, basePath, canonicalURL }: { article: PublicGuide; basePath: string; canonicalURL: string }) {
   const questions = faqPairs(article)
   const structured = questions.length ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -52,7 +52,7 @@ export function GuideArticle({ article, basePath }: { article: PublicGuide; base
     '@context': 'https://schema.org', '@type': 'Article',
     headline: article.title, description: article.description,
     datePublished: article.published_at, dateModified: article.updated_at,
-    mainEntityOfPage: article.permalink,
+    mainEntityOfPage: canonicalURL,
     author: article.author ? { '@type': 'Person', name: article.author } : undefined,
   }
 
@@ -101,7 +101,7 @@ export function GuideArticle({ article, basePath }: { article: PublicGuide; base
         <div><dt>Updated</dt><dd>{date(article.updated_at)} · {article.updated_by}</dd></div>
         <div><dt>Approved</dt><dd>{article.approved_at ? date(article.approved_at) : 'Not recorded'} · {article.approved_by}</dd></div>
         <div><dt>Published</dt><dd>{date(article.published_at)} · {article.published_by}</dd></div>
-        <div className="equiviq-guide-permalink"><dt>Permalink</dt><dd><a href={article.permalink}>{article.permalink}</a></dd></div>
+        <div className="equiviq-guide-permalink"><dt>Permalink</dt><dd><a href={canonicalURL}>{canonicalURL}</a></dd></div>
       </dl>
     </section>
   </main>
