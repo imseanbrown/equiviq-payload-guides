@@ -1,0 +1,19 @@
+{
+  "name": "@equiviq/payload-guides",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/plugin.ts",
+    "./server": "./src/server.ts",
+    "./components": "./src/components.tsx",
+    "./styles.css": "./src/styles.css"
+  },
+  "peerDependencies": {
+    "next": "^16.0.0",
+    "payload": "^3.90.0",
+    "react": "^19.0.0",
+    "react-markdown": "^10.0.0",
+    "remark-gfm": "^4.0.0"
+  }
+}

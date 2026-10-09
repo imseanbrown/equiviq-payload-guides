@@ -1,0 +1,108 @@
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+import type { PublicGuide, PublicGuideSummary } from './server'
+
+function date(value: string): string {
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? '' : new Intl.DateTimeFormat('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC',
+  }).format(parsed)
+}
+
+function faqPairs(article: PublicGuide): { question: string; answer: string }[] {
+  const faq = article.sections.find((section) => /^frequently asked questions$/i.test(section.title.trim()))
+  if (!faq) return []
+  const parts = faq.markdown.split(/^#{2,3}\s+(.+\?)\s*$/gm)
+  const pairs: { question: string; answer: string }[] = []
+  for (let index = 1; index + 1 < parts.length; index += 2) {
+    const question = parts[index].trim()
+    const answer = parts[index + 1].trim()
+    if (question && answer) pairs.push({ question, answer })
+  }
+  return pairs
+}
+
+export function GuideIndex({ guides, query, basePath }: { guides: PublicGuideSummary[]; query: string; basePath: string }) {
+  return <main className="equiviq-guide-shell">
+    <section className="equiviq-guide-card equiviq-guide-index">
+      <p className="equiviq-guide-eyebrow">Equiviq Knowledge</p>
+      <h1>Guides &amp; Resources</h1>
+      <p className="equiviq-guide-intro">Search publicly available guides from Equiviq.</p>
+      <form action={basePath} method="get" role="search" className="equiviq-guide-search">
+        <label htmlFor="equiviq-guide-query">Search guides</label>
+        <div><input id="equiviq-guide-query" name="q" type="search" defaultValue={query} placeholder="Search titles and article content" maxLength={120} /><button type="submit">Search</button></div>
+      </form>
+      {query && <div className="equiviq-guide-result-heading"><h2>{guides.length ? `Results for “${query}”` : `No results for “${query}”`}</h2><a href={basePath}>Clear search</a></div>}
+      {guides.length ? <ul className="equiviq-guide-list">{guides.map((guide) =>
+        <li key={guide.id}><a href={guide.permalink}><strong>{guide.title}</strong><span>{guide.document_number} <span aria-hidden="true">·</span> Updated {date(guide.updated_at)}</span></a></li>,
+      )}</ul> : <p className="equiviq-guide-empty">{query ? 'Try another term or browse all guides.' : 'No public guides are available yet.'}</p>}
+    </section>
+  </main>
+}
+
+export function GuideArticle({ article, basePath }: { article: PublicGuide; basePath: string }) {
+  const questions = faqPairs(article)
+  const structured = questions.length ? {
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: questions.map(({ question, answer }) => ({
+      '@type': 'Question', name: question, acceptedAnswer: { '@type': 'Answer', text: answer },
+    })),
+  } : {
+    '@context': 'https://schema.org', '@type': 'Article',
+    headline: article.title, description: article.description,
+    datePublished: article.published_at, dateModified: article.updated_at,
+    mainEntityOfPage: article.permalink,
+    author: article.author ? { '@type': 'Person', name: article.author } : undefined,
+  }
+
+  return <main className="equiviq-guide-shell">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, '\\u003c') }} />
+    <article className="equiviq-guide-card equiviq-guide-article">
+      <header className="equiviq-guide-heading">
+        <a className="equiviq-guide-back" href={basePath}>← All guides</a>
+        <p className="equiviq-guide-eyebrow">Guides &amp; Resources</p>
+        <h1>{article.title}</h1>
+        <span className="equiviq-guide-status">Publicly available</span>
+      </header>
+      <section className="equiviq-guide-classification" aria-label="Article details">
+        <dl>
+          {article.manufacturer && <div><dt>Manufacturer</dt><dd>{article.manufacturer}</dd></div>}
+          {article.folders?.length > 0 && <div><dt>Folders</dt><dd>{article.folders.join(', ')}</dd></div>}
+          {article.category && <div><dt>Category</dt><dd>{article.category}</dd></div>}
+          {article.tags?.length > 0 && <div><dt>Tags</dt><dd>{article.tags.join(', ')}</dd></div>}
+        </dl>
+        <dl>
+          <div><dt>Article ID</dt><dd>{article.document_number}</dd></div>
+          <div><dt>Version</dt><dd>v{article.version}</dd></div>
+          <div><dt>Updated</dt><dd>{date(article.updated_at)}</dd></div>
+          <div><dt>Visibility</dt><dd>Publicly Available</dd></div>
+        </dl>
+      </section>
+      <div className="equiviq-guide-content">
+        {article.sections.map((section, index) => <section key={`${section.title}-${index}`} className="equiviq-guide-section">
+          <h2>{section.title}</h2>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+            img: ({ src, alt }) => {
+              const source = typeof src === 'string' ? src : undefined
+              const match = source?.match(/\/knowledge\/article-images\/guides-resources\/([0-9a-f-]{36})/i)
+              const safe = match ? `/guide-media/${article.id}/${match[1]}` : source
+              return safe ? <img src={safe} alt={alt || ''} loading="lazy" /> : null
+            },
+          }}>{section.markdown}</ReactMarkdown>
+        </section>)}
+      </div>
+    </article>
+    <section className="equiviq-guide-card equiviq-guide-metadata" aria-labelledby="equiviq-guide-metadata-heading">
+      <h2 id="equiviq-guide-metadata-heading">Article metadata</h2>
+      <dl>
+        {article.author && <div><dt>Author</dt><dd>{article.author}</dd></div>}
+        <div><dt>Created</dt><dd>{date(article.created_at)} · {article.created_by}</dd></div>
+        <div><dt>Updated</dt><dd>{date(article.updated_at)} · {article.updated_by}</dd></div>
+        <div><dt>Approved</dt><dd>{article.approved_at ? date(article.approved_at) : 'Not recorded'} · {article.approved_by}</dd></div>
+        <div><dt>Published</dt><dd>{date(article.published_at)} · {article.published_by}</dd></div>
+        <div className="equiviq-guide-permalink"><dt>Permalink</dt><dd><a href={article.permalink}>{article.permalink}</a></dd></div>
+      </dl>
+    </section>
+  </main>
+}

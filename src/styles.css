@@ -1,0 +1,48 @@
+.equiviq-guide-shell{min-height:100vh;padding:clamp(1.5rem,5vw,4rem) 1rem;background:#f8f9fb;color:#172033;font-family:inherit}
+.equiviq-guide-card{width:min(100%,960px);margin:0 auto 1.25rem;padding:clamp(1.5rem,4vw,3rem);background:#fff;border:1px solid #e3e7ee;border-radius:18px;box-shadow:0 12px 38px rgba(25,35,55,.06)}
+.equiviq-guide-eyebrow{margin:0;color:var(--accent,#4b0082);font-size:.76rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase}
+.equiviq-guide-index h1,.equiviq-guide-heading h1{margin:.5rem 0 1rem;font-size:clamp(2rem,4vw,3rem);line-height:1.15;letter-spacing:-.035em}
+.equiviq-guide-intro{margin:0 0 2rem;color:#566276;font-size:1.08rem;line-height:1.6}
+.equiviq-guide-search{padding:1.5rem;background:#f8f9fb;border:1px solid #e3e7ee;border-radius:12px}
+.equiviq-guide-search label{display:block;margin-bottom:.65rem;font-weight:700}
+.equiviq-guide-search>div{display:flex;gap:.65rem}
+.equiviq-guide-search input{flex:1;min-width:0;padding:.8rem 1rem;border:1px solid #cbd3df;border-radius:8px;background:#fff;color:inherit;font:inherit}
+.equiviq-guide-search input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent,#4b0082) 28%,transparent);outline-offset:1px}
+.equiviq-guide-search button{padding:.8rem 1.35rem;border:0;border-radius:8px;background:var(--accent,#4b0082);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.equiviq-guide-search button:hover{filter:brightness(1.1)}
+.equiviq-guide-result-heading{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin:2rem 0 .6rem}
+.equiviq-guide-result-heading h2{margin:0;font-size:1.15rem}
+.equiviq-guide-result-heading a,.equiviq-guide-back,.equiviq-guide-metadata a{color:var(--accent,#4b0082);text-underline-offset:.2em}
+.equiviq-guide-list{list-style:none;margin:2rem 0 0;padding:0}
+.equiviq-guide-result-heading+.equiviq-guide-list{margin-top:0}
+.equiviq-guide-list li{border-bottom:1px solid #e3e7ee}
+.equiviq-guide-list li:first-child{border-top:1px solid #e3e7ee}
+.equiviq-guide-list a{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;padding:1.2rem .25rem;color:inherit;text-decoration:none}
+.equiviq-guide-list a:hover strong,.equiviq-guide-list a:focus-visible strong{color:var(--accent,#4b0082);text-decoration:underline}
+.equiviq-guide-list strong{font-size:1.06rem}
+.equiviq-guide-list span{color:#667085;font-size:.85rem;white-space:nowrap}
+.equiviq-guide-empty{padding:2rem 0;color:#667085}
+.equiviq-guide-back{display:inline-block;margin-bottom:1.3rem;font-size:.88rem;font-weight:700}
+.equiviq-guide-status{display:inline-block;padding:.35rem .8rem;border-radius:999px;background:#e9f4eb;color:#28603b;font-size:.78rem;font-weight:750}
+.equiviq-guide-classification{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin:1.6rem 0 0;padding:1.5rem 0;border-top:1px solid #dfe4eb;border-bottom:1px solid #dfe4eb}
+.equiviq-guide-classification dl{display:grid;align-content:start;gap:1rem;margin:0}
+.equiviq-guide-classification dt,.equiviq-guide-metadata dt{margin:0 0 .2rem;color:#667085;font-size:.74rem;font-weight:750;letter-spacing:.075em;text-transform:uppercase}
+.equiviq-guide-classification dd,.equiviq-guide-metadata dd{margin:0;overflow-wrap:anywhere;font-weight:550}
+.equiviq-guide-content{padding-top:.8rem}
+.equiviq-guide-section{margin:2rem 0;line-height:1.7;overflow-wrap:anywhere}
+.equiviq-guide-section+.equiviq-guide-section{margin-top:2.5rem}
+.equiviq-guide-section h2{margin:0 0 1rem;padding-bottom:.55rem;border-bottom:1px solid #cbd3df;font-size:1.45rem;line-height:1.3}
+.equiviq-guide-section h3{margin:1.4rem 0 .5rem;font-size:1.18rem}
+.equiviq-guide-section p,.equiviq-guide-section ul,.equiviq-guide-section ol{margin:.7rem 0}
+.equiviq-guide-section a{color:var(--accent,#4b0082);text-underline-offset:.2em}
+.equiviq-guide-section blockquote{margin:1.2rem 0;padding:.85rem 1.2rem;border-left:4px solid var(--accent,#4b0082);border-radius:0 8px 8px 0;background:#f6f2f9}
+.equiviq-guide-section pre{max-width:100%;overflow:auto;padding:1rem;border-radius:8px;background:#f2f4f7}
+.equiviq-guide-section code{overflow-wrap:anywhere}
+.equiviq-guide-section img{max-width:100%;height:auto;border-radius:6px}
+.equiviq-guide-section table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}
+.equiviq-guide-section th,.equiviq-guide-section td{padding:.55rem .75rem;border:1px solid #dfe4eb;text-align:left}
+.equiviq-guide-metadata h2{margin:0 0 1.3rem;font-size:1.15rem}
+.equiviq-guide-metadata dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem 2rem;margin:0}
+.equiviq-guide-permalink{grid-column:1/-1}
+@media(max-width:680px){.equiviq-guide-list a,.equiviq-guide-result-heading{display:block}.equiviq-guide-list span{display:block;margin-top:.3rem;white-space:normal}.equiviq-guide-classification,.equiviq-guide-metadata dl{grid-template-columns:1fr}.equiviq-guide-search>div{flex-direction:column}}
+@media print{@page{margin:.7in}.equiviq-guide-shell{padding:0;background:#fff}.equiviq-guide-card{width:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}.equiviq-guide-back,.equiviq-guide-search{display:none}.equiviq-guide-heading{break-inside:avoid-page}.equiviq-guide-heading h1{font-size:24pt}.equiviq-guide-section{font-size:10.75pt;line-height:1.45}.equiviq-guide-section h2{break-after:avoid-page;font-size:14pt}.equiviq-guide-section p{orphans:3;widows:3}.equiviq-guide-section img,.equiviq-guide-section pre,.equiviq-guide-section blockquote,.equiviq-guide-section table{break-inside:avoid-page}.equiviq-guide-metadata{margin-top:14pt;padding:9pt 10pt}}
