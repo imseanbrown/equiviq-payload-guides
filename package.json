@@ -1,6 +1,6 @@
 {
   "name": "@equiviq/payload-guides",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "exports": {
@@ -10,7 +10,8 @@
     "./filters": "./src/filters.ts",
     "./view-tracker": "./src/view-tracker.tsx",
     "./facet-field": "./src/facet-field.tsx",
-    "./styles.css": "./src/styles.css"
+    "./styles.css": "./src/styles.css",
+    "./assets/*": "./assets/*"
   },
   "peerDependencies": {
     "next": "^16.0.0",
