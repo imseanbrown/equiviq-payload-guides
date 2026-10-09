@@ -28,7 +28,7 @@ export function GuideIndex({ guides, query, basePath, heading = 'Guides & Resour
     <section className="equiviq-guide-card equiviq-guide-index">
       <p className="equiviq-guide-eyebrow">Equiviq Knowledge</p>
       <h1>{heading}</h1>
-      <p className="equiviq-guide-intro">Search publicly available guides from Equiviq.</p>
+      <p className="equiviq-guide-intro">Search guides from Equiviq.</p>
       <form action={basePath} method="get" role="search" className="equiviq-guide-search">
         <label htmlFor="equiviq-guide-query">Search guides</label>
         <div><input id="equiviq-guide-query" name="q" type="search" defaultValue={query} placeholder="Search titles and article content" maxLength={120} /><button type="submit">Search</button></div>
@@ -36,7 +36,7 @@ export function GuideIndex({ guides, query, basePath, heading = 'Guides & Resour
       {query && <div className="equiviq-guide-result-heading"><h2>{guides.length ? `Results for “${query}”` : `No results for “${query}”`}</h2><a href={basePath}>Clear search</a></div>}
       {guides.length ? <ul className="equiviq-guide-list">{guides.map((guide) =>
         <li key={guide.id}><a href={`${basePath}/${guide.slug}`}><strong>{guide.title}</strong><span>{guide.document_number} <span aria-hidden="true">·</span> Updated {date(guide.updated_at)}</span></a></li>,
-      )}</ul> : <p className="equiviq-guide-empty">{query ? 'Try another term or browse all guides.' : 'No public guides are available yet.'}</p>}
+      )}</ul> : <p className="equiviq-guide-empty">{query ? 'Try another term or browse all guides.' : 'No guides are available yet.'}</p>}
     </section>
   </div>
 }
@@ -63,7 +63,7 @@ export function GuideArticle({ article, basePath, canonicalURL }: { article: Pub
         <a className="equiviq-guide-back" href={basePath}>← All guides</a>
         <p className="equiviq-guide-eyebrow">Guides &amp; Resources</p>
         <h1>{article.title}</h1>
-        <span className="equiviq-guide-status">Publicly available</span>
+        <span className="equiviq-guide-status">{article.visibility_label}</span>
       </header>
       <section className="equiviq-guide-classification" aria-label="Article details">
         <dl>
@@ -76,7 +76,7 @@ export function GuideArticle({ article, basePath, canonicalURL }: { article: Pub
           <div><dt>Article ID</dt><dd>{article.document_number}</dd></div>
           <div><dt>Version</dt><dd>v{article.version}</dd></div>
           <div><dt>Updated</dt><dd>{date(article.updated_at)}</dd></div>
-          <div><dt>Visibility</dt><dd>Publicly Available</dd></div>
+          <div><dt>Visibility</dt><dd>{article.visibility_label}</dd></div>
         </dl>
       </section>
       <div className="equiviq-guide-content">

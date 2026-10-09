@@ -6,6 +6,8 @@ export type PublicGuideSummary = {
   title: string
   updated_at: string
   slug: string
+  visibility_label: string
+  public_access: true
   /** Present only in Equiviq 0.1.0 responses during a rolling upgrade. */
   permalink?: string
 }
@@ -18,7 +20,6 @@ export type PublicGuide = PublicGuideSummary & {
   tags: string[]
   folders: string[]
   version: number
-  visibility: 'Publicly Available'
   created_at: string
   published_at: string
   approved_at: string | null
@@ -70,7 +71,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
     const result = await request<{ guides: PublicGuideSummary[]; search_applied?: boolean }>('', query)
     const items = result && Array.isArray(result.guides) ? result.guides.map((guide) => ({
       ...guide, slug: guide.slug || guide.permalink?.split('/').pop() || '',
-    })).filter((guide) => guideSlug.test(guide.slug)) : null
+    })).filter((guide) => guideSlug.test(guide.slug) && guide.public_access === true && typeof guide.visibility_label === 'string' && guide.visibility_label.trim() !== '') : null
     return items && query && !result?.search_applied
       ? items.filter((guide) => guide.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
       : items
@@ -79,7 +80,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
   async function getGuide(slug: string): Promise<PublicGuide | null> {
     if (!guideSlug.test(slug)) return null
     const article = await request<PublicGuide>(encodeURIComponent(slug))
-    return article?.visibility === 'Publicly Available' && Array.isArray(article.sections)
+    return article?.public_access === true && typeof article.visibility_label === 'string' && article.visibility_label.trim() !== '' && Array.isArray(article.sections)
       ? { ...article, slug: article.slug || article.permalink?.split('/').pop() || '' } : null
   }
 
