@@ -44,6 +44,9 @@
 .equiviq-guide-callout-content{flex:1;min-width:0}
 .equiviq-guide-section .equiviq-guide-callout-label{margin:0 0 .2rem;color:var(--callout-color);font-size:1.2rem;font-weight:800;line-height:1.1;text-transform:uppercase}
 .equiviq-guide-section .equiviq-guide-callout-content>:not(.equiviq-guide-callout-label){margin:0;color:#1f2a40;font-size:1rem;font-weight:700;line-height:1.4}
+.equiviq-guide-section blockquote.equiviq-guide-callout-theme{--callout-color:var(--accent,#4b0082);display:block;padding:1.5rem 1.75rem;border:0;border-left:.3rem solid var(--callout-color);border-radius:0 .75rem .75rem 0;background:color-mix(in srgb,var(--callout-color) 6%,transparent);color:inherit}
+.equiviq-guide-section .equiviq-guide-callout-theme .equiviq-guide-callout-label{color:inherit;font-size:1rem;font-weight:700}
+.equiviq-guide-section .equiviq-guide-callout-theme .equiviq-guide-callout-content>:not(.equiviq-guide-callout-label){color:inherit;font-weight:400;line-height:1.6}
 .equiviq-guide-section pre{max-width:100%;overflow:auto;padding:1rem;border-radius:8px;background:#f2f4f7}
 .equiviq-guide-section code{overflow-wrap:anywhere}
 .equiviq-guide-section img{max-width:100%;height:auto;border-radius:6px}

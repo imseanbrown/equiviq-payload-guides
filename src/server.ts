@@ -8,6 +8,10 @@ export type PublicGuideSummary = {
   slug: string
   visibility_label: string
   public_access: true
+  category?: string
+  company?: string
+  tags?: string[]
+  folders?: string[]
   /** Present only in Equiviq 0.1.0 responses during a rolling upgrade. */
   permalink?: string
 }
@@ -29,6 +33,8 @@ export type PublicGuide = PublicGuideSummary & {
   published_by: string
   sections: { title: string; markdown: string }[]
 }
+
+export type GuideFacets = { folders: string[]; categories: string[]; tags: string[]; companies: string[] }
 
 const guideSlug = /^[a-z0-9-]{38,200}$/
 const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i
@@ -103,5 +109,31 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
     }
   }
 
-  return { listGuides, getGuide, getImage }
+  async function recordView(slug: string, eventID: string, referrer: string): Promise<boolean> {
+    if (!guideSlug.test(slug) || !uuid.test(eventID)) return false
+    const configured = configuration()
+    if (!configured) return false
+    const { url, key } = configured
+    url.pathname = `${url.pathname.replace(/\/$/, '')}/${encodeURIComponent(slug)}/views`
+    try {
+      const response = await fetch(url, {
+        method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: eventID, referrer }), cache: 'no-store', signal: AbortSignal.timeout(7000),
+      })
+      return response.status === 204
+    } catch { return false }
+  }
+
+  async function getFacets(): Promise<GuideFacets | null> {
+    const configured = configuration()
+    if (!configured) return null
+    const { url, key } = configured
+    url.pathname = url.pathname.replace(/\/guides\/?$/, '/guide-facets')
+    try {
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${key}`, Accept: 'application/json' }, cache: 'no-store', signal: AbortSignal.timeout(7000) })
+      return response.ok ? (await response.json()) as GuideFacets : null
+    } catch { return null }
+  }
+
+  return { listGuides, getGuide, getImage, recordView, getFacets }
 }

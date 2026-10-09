@@ -6,7 +6,7 @@ import type { PublicGuide, PublicGuideSummary } from './server'
 
 const calloutKinds = new Set(['NOTE', 'INFO', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION'])
 
-function GuideBlockquote({ children }: { children?: ReactNode }) {
+function GuideBlockquote({ children, style = 'equiviq' }: { children?: ReactNode; style?: 'equiviq' | 'theme' }) {
   const paragraphs = Children.toArray(children).filter((part) => typeof part !== 'string' || part.trim())
   const first = paragraphs[0]
   if (!isValidElement<{ children?: ReactNode }>(first)) return <blockquote>{children}</blockquote>
@@ -16,10 +16,10 @@ function GuideBlockquote({ children }: { children?: ReactNode }) {
   if (!marker || !calloutKinds.has(marker[1].toUpperCase())) return <blockquote>{children}</blockquote>
   const kind = marker[1].toUpperCase()
   const remainder = firstText.slice(marker[0].length).trim()
-  return <blockquote className={`equiviq-guide-callout equiviq-guide-callout-${kind.toLowerCase()}`}>
-    <span className="equiviq-guide-callout-icon" aria-hidden="true">
+  return <blockquote className={`equiviq-guide-callout equiviq-guide-callout-${kind.toLowerCase()} ${style === 'theme' ? 'equiviq-guide-callout-theme' : ''}`}>
+    {style === 'equiviq' && <span className="equiviq-guide-callout-icon" aria-hidden="true">
       {kind === 'TIP' ? '✦' : kind === 'IMPORTANT' || kind === 'CAUTION' ? '☞' : kind === 'WARNING' ? '!' : 'i'}
-    </span>
+    </span>}
     <div className="equiviq-guide-callout-content">
       <p className="equiviq-guide-callout-label">{kind}</p>
       {(remainder || firstParts.length > 1) && <p>{remainder}{firstParts.slice(1)}</p>}
@@ -66,7 +66,11 @@ export function GuideIndex({ guides, query, basePath, heading = 'Guides & Resour
   </div>
 }
 
-export function GuideArticle({ article, basePath, canonicalURL }: { article: PublicGuide; basePath: string; canonicalURL: string }) {
+type VisibilitySettings = { show?: boolean | null; [key: string]: boolean | null | undefined }
+type ArticleSettings = { calloutStyle?: 'equiviq' | 'theme' | null; classification?: VisibilitySettings | null; metadata?: VisibilitySettings | null }
+function visible(group: VisibilitySettings | null | undefined, key: string): boolean { return group?.show !== false && group?.[key] !== false }
+
+export function GuideArticle({ article, basePath, canonicalURL, settings }: { article: PublicGuide; basePath: string; canonicalURL: string; settings?: ArticleSettings }) {
   const questions = faqPairs(article)
   const structured = questions.length ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -88,27 +92,26 @@ export function GuideArticle({ article, basePath, canonicalURL }: { article: Pub
         <a className="equiviq-guide-back" href={basePath}>← All guides</a>
         <p className="equiviq-guide-eyebrow">Guides &amp; Resources</p>
         <h1>{article.title}</h1>
-        <span className="equiviq-guide-status">{article.visibility_label}</span>
+        {visible(settings?.classification, 'visibility') && <span className="equiviq-guide-status">{article.visibility_label}</span>}
       </header>
-      <section className="equiviq-guide-classification" aria-label="Article details">
+      {settings?.classification?.show !== false && <section className="equiviq-guide-classification" aria-label="Article details">
         <dl>
-          {article.manufacturer && <div><dt>Manufacturer</dt><dd>{article.manufacturer}</dd></div>}
-          {article.folders?.length > 0 && <div><dt>Folders</dt><dd>{article.folders.join(', ')}</dd></div>}
-          {article.category && <div><dt>Category</dt><dd>{article.category}</dd></div>}
-          {article.tags?.length > 0 && <div><dt>Tags</dt><dd>{article.tags.join(', ')}</dd></div>}
+          {visible(settings?.classification, 'folders') && article.folders?.length > 0 && <div><dt>Folders</dt><dd>{article.folders.join(', ')}</dd></div>}
+          {visible(settings?.classification, 'category') && article.category && <div><dt>Category</dt><dd>{article.category}</dd></div>}
+          {visible(settings?.classification, 'tags') && article.tags?.length > 0 && <div><dt>Tags</dt><dd>{article.tags.join(', ')}</dd></div>}
         </dl>
         <dl>
-          <div><dt>Article ID</dt><dd>{article.document_number}</dd></div>
-          <div><dt>Version</dt><dd>v{article.version}</dd></div>
-          <div><dt>Updated</dt><dd>{date(article.updated_at)}</dd></div>
-          <div><dt>Visibility</dt><dd>{article.visibility_label}</dd></div>
+          {visible(settings?.classification, 'articleId') && <div><dt>Article ID</dt><dd>{article.document_number}</dd></div>}
+          {visible(settings?.classification, 'version') && <div><dt>Version</dt><dd>v{article.version}</dd></div>}
+          {visible(settings?.classification, 'updated') && <div><dt>Updated</dt><dd>{date(article.updated_at)}</dd></div>}
+          {visible(settings?.classification, 'visibility') && <div><dt>Visibility</dt><dd>{article.visibility_label}</dd></div>}
         </dl>
-      </section>
+      </section>}
       <div className="equiviq-guide-content">
         {article.sections.map((section, index) => <section key={`${section.title}-${index}`} className="equiviq-guide-section">
           <h2>{section.title}</h2>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
-            blockquote: ({ children }) => <GuideBlockquote>{children}</GuideBlockquote>,
+            blockquote: ({ children }) => <GuideBlockquote style={settings?.calloutStyle === 'theme' ? 'theme' : 'equiviq'}>{children}</GuideBlockquote>,
             img: ({ src, alt }) => {
               const source = typeof src === 'string' ? src : undefined
               const match = source?.match(/\/knowledge\/article-images\/guides-resources\/([0-9a-f-]{36})/i)
@@ -119,16 +122,16 @@ export function GuideArticle({ article, basePath, canonicalURL }: { article: Pub
         </section>)}
       </div>
     </article>
-    <section className="equiviq-guide-card equiviq-guide-metadata" aria-labelledby="equiviq-guide-metadata-heading">
+    {settings?.metadata?.show !== false && <section className="equiviq-guide-card equiviq-guide-metadata" aria-labelledby="equiviq-guide-metadata-heading">
       <h2 id="equiviq-guide-metadata-heading">Article metadata</h2>
       <dl>
-        {article.author && <div><dt>Author</dt><dd>{article.author}</dd></div>}
-        <div><dt>Created</dt><dd>{date(article.created_at)} · {article.created_by}</dd></div>
-        <div><dt>Updated</dt><dd>{date(article.updated_at)} · {article.updated_by}</dd></div>
-        <div><dt>Approved</dt><dd>{article.approved_at ? date(article.approved_at) : 'Not recorded'} · {article.approved_by}</dd></div>
-        <div><dt>Published</dt><dd>{date(article.published_at)} · {article.published_by}</dd></div>
-        <div className="equiviq-guide-permalink"><dt>Permalink</dt><dd><a href={canonicalURL}>{canonicalURL}</a></dd></div>
+        {visible(settings?.metadata, 'author') && article.author && <div><dt>Author</dt><dd>{article.author}</dd></div>}
+        {visible(settings?.metadata, 'created') && <div><dt>Created</dt><dd>{date(article.created_at)} · {article.created_by}</dd></div>}
+        {visible(settings?.metadata, 'updated') && <div><dt>Updated</dt><dd>{date(article.updated_at)} · {article.updated_by}</dd></div>}
+        {visible(settings?.metadata, 'approved') && <div><dt>Approved</dt><dd>{article.approved_at ? date(article.approved_at) : 'Not recorded'} · {article.approved_by}</dd></div>}
+        {visible(settings?.metadata, 'published') && <div><dt>Published</dt><dd>{date(article.published_at)} · {article.published_by}</dd></div>}
+        {visible(settings?.metadata, 'permalink') && <div className="equiviq-guide-permalink"><dt>Permalink</dt><dd><a href={canonicalURL}>{canonicalURL}</a></dd></div>}
       </dl>
-    </section>
+    </section>}
   </main>
 }

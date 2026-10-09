@@ -1,12 +1,15 @@
 {
   "name": "@equiviq/payload-guides",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/plugin.ts",
     "./server": "./src/server.ts",
     "./components": "./src/components.tsx",
+    "./filters": "./src/filters.ts",
+    "./view-tracker": "./src/view-tracker.tsx",
+    "./facet-field": "./src/facet-field.tsx",
     "./styles.css": "./src/styles.css"
   },
   "peerDependencies": {

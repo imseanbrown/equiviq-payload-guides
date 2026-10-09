@@ -13,7 +13,27 @@ export const equiviqGuidesBlock: Block = {
   slug: 'equiviqGuides',
   labels: { singular: 'Equiviq Guides', plural: 'Equiviq Guides' },
   interfaceName: 'EquiviqGuidesBlock',
-  fields: [{ name: 'heading', type: 'text', defaultValue: 'Guides & Resources', required: true }],
+  fields: [
+    { name: 'heading', type: 'text', defaultValue: 'Guides & Resources', required: true },
+    { name: 'filters', type: 'group', label: 'Article filters', fields: [
+      ...(['folder', 'category', 'tag', 'company'] as const).flatMap((kind) => [
+        { name: `${kind}Include`, type: 'text' as const, label: `Include ${kind}s`, admin: { components: { Field: { path: '@equiviq/payload-guides/facet-field#FacetField', clientProps: { kind, mode: 'Include' } } } } },
+        { name: `${kind}Exclude`, type: 'text' as const, label: `Exclude ${kind}s`, admin: { components: { Field: { path: '@equiviq/payload-guides/facet-field#FacetField', clientProps: { kind, mode: 'Exclude' } } } } },
+      ]),
+    ] },
+    { name: 'calloutStyle', type: 'select', defaultValue: 'equiviq', options: [
+      { label: 'Inherit from Equiviq', value: 'equiviq' },
+      { label: 'Inherit from website theme', value: 'theme' },
+    ] },
+    { name: 'classification', type: 'group', label: 'Categorization block', fields: [
+      { name: 'show', type: 'checkbox', defaultValue: true, label: 'Show categorization block' },
+      ...(['folders', 'category', 'tags', 'articleId', 'version', 'updated', 'visibility'] as const).map((name) => ({ name, type: 'checkbox' as const, defaultValue: true, label: `Show ${name}` })),
+    ] },
+    { name: 'metadata', type: 'group', label: 'Metadata block', fields: [
+      { name: 'show', type: 'checkbox', defaultValue: true, label: 'Show metadata block' },
+      ...(['author', 'updated', 'published', 'created', 'approved', 'permalink'] as const).map((name) => ({ name, type: 'checkbox' as const, defaultValue: true, label: `Show ${name}` })),
+    ] },
+  ],
 }
 
 export const equiviqGuidesSettings: GlobalConfig = {
