@@ -1,7 +1,32 @@
+import { Children, isValidElement, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 import type { PublicGuide, PublicGuideSummary } from './server'
+
+const calloutKinds = new Set(['NOTE', 'INFO', 'TIP', 'IMPORTANT', 'WARNING', 'CAUTION'])
+
+function GuideBlockquote({ children }: { children?: ReactNode }) {
+  const paragraphs = Children.toArray(children).filter((part) => typeof part !== 'string' || part.trim())
+  const first = paragraphs[0]
+  if (!isValidElement<{ children?: ReactNode }>(first)) return <blockquote>{children}</blockquote>
+  const firstParts = Children.toArray(first.props.children)
+  const firstText = typeof firstParts[0] === 'string' ? firstParts[0] : ''
+  const marker = firstText.match(/^\s*\[!(NOTE|INFO|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s|$)/i)
+  if (!marker || !calloutKinds.has(marker[1].toUpperCase())) return <blockquote>{children}</blockquote>
+  const kind = marker[1].toUpperCase()
+  const remainder = firstText.slice(marker[0].length).trim()
+  return <blockquote className={`equiviq-guide-callout equiviq-guide-callout-${kind.toLowerCase()}`}>
+    <span className="equiviq-guide-callout-icon" aria-hidden="true">
+      {kind === 'TIP' ? '✦' : kind === 'IMPORTANT' || kind === 'CAUTION' ? '☞' : kind === 'WARNING' ? '!' : 'i'}
+    </span>
+    <div className="equiviq-guide-callout-content">
+      <p className="equiviq-guide-callout-label">{kind}</p>
+      {(remainder || firstParts.length > 1) && <p>{remainder}{firstParts.slice(1)}</p>}
+      {paragraphs.slice(1)}
+    </div>
+  </blockquote>
+}
 
 function date(value: string): string {
   const parsed = new Date(value)
@@ -83,6 +108,7 @@ export function GuideArticle({ article, basePath, canonicalURL }: { article: Pub
         {article.sections.map((section, index) => <section key={`${section.title}-${index}`} className="equiviq-guide-section">
           <h2>{section.title}</h2>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
+            blockquote: ({ children }) => <GuideBlockquote>{children}</GuideBlockquote>,
             img: ({ src, alt }) => {
               const source = typeof src === 'string' ? src : undefined
               const match = source?.match(/\/knowledge\/article-images\/guides-resources\/([0-9a-f-]{36})/i)
