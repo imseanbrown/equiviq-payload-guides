@@ -36,10 +36,10 @@
 .equiviq-guide-section p,.equiviq-guide-section ul,.equiviq-guide-section ol{margin:.7rem 0}
 .equiviq-guide-section a{color:var(--accent,#4b0082);text-underline-offset:.2em}
 .equiviq-guide-section blockquote{margin:1.2rem 0;padding:.85rem 1.2rem;border-left:4px solid var(--accent,#4b0082);border-radius:0 8px 8px 0;background:#f6f2f9}
-.equiviq-guide-section blockquote.equiviq-guide-callout{--callout-color:#297da6;display:flex;align-items:center;gap:1rem;width:100%;margin:1rem 0;padding:.75rem 1rem;border:1px solid var(--callout-color);border-left:.55rem solid var(--callout-color);border-radius:1rem;background:color-mix(in srgb,var(--callout-color) 9%,#fff);color:#1f2a40;line-height:1.35;break-inside:avoid;print-color-adjust:exact}
-.equiviq-guide-section blockquote.equiviq-guide-callout-tip{--callout-color:#56812a}
-.equiviq-guide-section blockquote.equiviq-guide-callout-important,.equiviq-guide-section blockquote.equiviq-guide-callout-caution{--callout-color:#937000}
-.equiviq-guide-section blockquote.equiviq-guide-callout-warning{--callout-color:#c84b4c}
+.equiviq-guide-section blockquote.equiviq-guide-callout{--callout-color:var(--equiviq-callout-note,#297da6);display:flex;align-items:center;gap:1rem;width:100%;margin:1rem 0;padding:.75rem 1rem;border:1px solid var(--callout-color);border-left:.55rem solid var(--callout-color);border-radius:1rem;background:color-mix(in srgb,var(--callout-color) 9%,#fff);color:#1f2a40;line-height:1.35;break-inside:avoid;print-color-adjust:exact}
+.equiviq-guide-section blockquote.equiviq-guide-callout-tip{--callout-color:var(--equiviq-callout-tip,#56812a)}
+.equiviq-guide-section blockquote.equiviq-guide-callout-important,.equiviq-guide-section blockquote.equiviq-guide-callout-caution{--callout-color:var(--equiviq-callout-important,#937000)}
+.equiviq-guide-section blockquote.equiviq-guide-callout-warning{--callout-color:var(--equiviq-callout-warning,#c84b4c)}
 .equiviq-guide-callout-icon{display:grid;flex:0 0 clamp(3rem,5vw,4.5rem);place-items:center;width:clamp(3rem,5vw,4.5rem);aspect-ratio:1;border-radius:50%;background:color-mix(in srgb,var(--callout-color) 16%,#fff)}
 .equiviq-guide-callout-icon>span{display:block;width:62%;height:62%;background:var(--callout-color);-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-size:100% 100%;mask-size:100% 100%}
 .equiviq-guide-callout-icon-pin{-webkit-mask-image:url('/callouts/callout-icon-pin.svg');mask-image:url('/callouts/callout-icon-pin.svg')}

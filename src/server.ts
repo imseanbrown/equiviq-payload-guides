@@ -17,6 +17,7 @@ export type PublicGuideSummary = {
 }
 
 export type PublicGuide = PublicGuideSummary & {
+  callout_colors?: { note?: string; tip?: string; important?: string; warning?: string }
   description: string
   author: string
   manufacturer: string

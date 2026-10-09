@@ -1,4 +1,4 @@
-import { Children, isValidElement, type ReactNode } from 'react'
+import { Children, isValidElement, type CSSProperties, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -77,6 +77,13 @@ type ArticleSettings = { calloutStyle?: 'equiviq' | 'theme' | null; classificati
 function visible(group: VisibilitySettings | null | undefined, key: string): boolean { return group?.show !== false && group?.[key] !== false }
 
 export function GuideArticle({ article, basePath, canonicalURL, settings }: { article: PublicGuide; basePath: string; canonicalURL: string; settings?: ArticleSettings }) {
+  const safeColor = (value?: string) => value && /^#[0-9a-f]{6}$/i.test(value) ? value : undefined
+  const calloutVariables = {
+    '--equiviq-callout-note': safeColor(article.callout_colors?.note),
+    '--equiviq-callout-tip': safeColor(article.callout_colors?.tip),
+    '--equiviq-callout-important': safeColor(article.callout_colors?.important),
+    '--equiviq-callout-warning': safeColor(article.callout_colors?.warning),
+  } as CSSProperties
   const questions = faqPairs(article)
   const structured = questions.length ? {
     '@context': 'https://schema.org', '@type': 'FAQPage',
@@ -93,7 +100,7 @@ export function GuideArticle({ article, basePath, canonicalURL, settings }: { ar
 
   return <main className="equiviq-guide-shell">
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, '\\u003c') }} />
-    <article className="equiviq-guide-card equiviq-guide-article">
+    <article className="equiviq-guide-card equiviq-guide-article" style={calloutVariables}>
       <header className="equiviq-guide-heading">
         <a className="equiviq-guide-back" href={basePath}>← All guides</a>
         <p className="equiviq-guide-eyebrow">Guides &amp; Resources</p>

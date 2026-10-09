@@ -15,6 +15,7 @@ test('legacy Equiviq callouts use the selected Equiviq layout and exact icon fam
     updated_at: '2026-10-09T00:00:00Z', visibility_label: 'Public Access', public_access: true,
     description: 'Factory reset guide', author: 'Equiviq', manufacturer: 'Polycom', category: '', tags: [], folders: [],
     version: 1, created_at: '2026-10-09T00:00:00Z', published_at: '2026-10-09T00:00:00Z', approved_at: null,
+    callout_colors: { note: '#336699', warning: '#aabbcc' },
     created_by: '', updated_by: '', approved_by: '', published_by: '',
     sections: [{ title: 'Prerequisites', markdown: source }],
   }
@@ -26,5 +27,6 @@ test('legacy Equiviq callouts use the selected Equiviq layout and exact icon fam
   assert.match(html, /equiviq-guide-callout-warning/)
   assert.match(html, /equiviq-guide-callout-icon-pin/)
   assert.match(html, /equiviq-guide-callout-icon-warning/)
+  assert.match(html, /--equiviq-callout-note:#336699/)
   assert.doesNotMatch(html, /<strong>NOTE<\/strong>/)
 })
