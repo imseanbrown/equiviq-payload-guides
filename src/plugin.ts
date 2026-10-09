@@ -1,4 +1,5 @@
 import type { Block, CollectionConfig, Config, GlobalConfig } from 'payload'
+import { decryptGuideKey, encryptGuideKey } from './credentials'
 
 export type EquiviqGuidesOptions = {
   /** Name of the server environment variable containing the HTTPS guide list API URL. */
@@ -39,8 +40,20 @@ export const equiviqGuidesBlock: Block = {
 export const equiviqGuidesSettings: GlobalConfig = {
   slug: 'equiviq-guides-settings',
   label: 'Equiviq Guides',
-  admin: { description: 'Place an Equiviq Guides block on any published page. Choose the primary page here for canonical article URLs. Configure the API URL and key as server secrets.' },
+  admin: { description: 'Connect to Equiviq, then place an Equiviq Guides block on a published page. The API key is encrypted and is never displayed again after saving.' },
   access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
+  endpoints: [{ path: '/test-connection', method: 'post', handler: async (req) => {
+    if (!req.user) return Response.json({ message: 'Sign in to test the connection.' }, { status: 401 })
+    const settings = await req.payload.findGlobal({ slug: 'equiviq-guides-settings', depth: 0, context: { equiviqGuidesInternal: true } }) as { apiUrl?: string; apiKey?: string }
+    if (!settings.apiUrl || !settings.apiKey) return Response.json({ message: 'Save an API URL and key before testing.' }, { status: 400 })
+    try {
+      const response = await fetch(settings.apiUrl, { headers: { Authorization: `Bearer ${settings.apiKey}`, Accept: 'application/json' }, cache: 'no-store', signal: AbortSignal.timeout(7000) })
+      if (!response.ok) return Response.json({ message: response.status === 401 || response.status === 403 ? 'Equiviq rejected this API key.' : `Equiviq returned HTTP ${response.status}.` }, { status: 502 })
+      const body = await response.json() as { guides?: unknown }
+      if (!Array.isArray(body.guides)) return Response.json({ message: 'Equiviq returned an unexpected response.' }, { status: 502 })
+      return Response.json({ message: 'Connected to Equiviq. Guides are available to your content blocks.' })
+    } catch { return Response.json({ message: 'Could not reach Equiviq. Check the API URL and try again.' }, { status: 502 }) }
+  } }],
   hooks: { beforeChange: [async ({ data, originalDoc, req }) => {
     const previous = typeof originalDoc?.primaryPage === 'object' ? originalDoc.primaryPage?.id : originalDoc?.primaryPage
     const selected = typeof data.primaryPage === 'object' ? data.primaryPage?.id : data.primaryPage
@@ -59,10 +72,27 @@ export const equiviqGuidesSettings: GlobalConfig = {
     }
     return data
   }] },
-  fields: [{
+  fields: [
+  { name: 'apiUrl', label: 'Equiviq API URL', type: 'text', admin: { description: 'Paste the HTTPS Guides API URL from the Equiviq Payload plugin settings.' },
+    validate: (value: unknown) => {
+      if (!value) return true
+      try {
+        const url = new URL(String(value))
+        return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash && /\/api\/public\/plugins\/equiviq-payload\/[^/]+\/guides\/?$/.test(url.pathname)
+          ? true : 'Enter the HTTPS Guides API URL shown in Equiviq.'
+      } catch { return 'Enter a valid HTTPS Guides API URL.' }
+    } },
+  { name: 'apiKey', label: 'Equiviq API key', type: 'text', admin: { description: 'Paste a new API key to set or rotate it. Leave blank to keep the existing key. It will never be displayed again.' },
+    hooks: {
+      beforeChange: [({ value, previousValue, req }) => value ? encryptGuideKey(String(value), req.payload.secret) : previousValue],
+      afterRead: [({ value, req }) => req.context?.equiviqGuidesInternal === true && value ? decryptGuideKey(String(value), req.payload.secret) : null],
+    } },
+  { name: 'connectionTest', type: 'ui', admin: { components: { Field: '@equiviq/payload-guides/connection-test#ConnectionTest' } } },
+  {
     name: 'primaryPage', label: 'Primary guide page', type: 'relationship', relationTo: 'pages',
     admin: { description: 'This page must contain an Equiviq Guides block. Other pages may also contain the block; search engines will use this page as the canonical article location.' },
-  }, { name: 'legacyPaths', type: 'array', admin: { hidden: true }, fields: [{ name: 'path', type: 'text', required: true }] }],
+  }, { name: 'legacyPaths', type: 'array', admin: { hidden: true }, fields: [{ name: 'path', type: 'text', required: true }] },
+  ],
 }
 
 export function equiviqGuidesPlugin(options: EquiviqGuidesOptions) {

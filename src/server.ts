@@ -40,10 +40,12 @@ export type GuideFacets = { folders: string[]; categories: string[]; tags: strin
 const guideSlug = /^[a-z0-9-]{38,200}$/
 const uuid = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i
 
-export function createGuideClient(options: EquiviqGuidesOptions) {
-  function configuration(): { url: URL; key: string } | null {
-    const rawURL = process.env[options.apiUrlEnv]
-    const key = process.env[options.apiKeyEnv]
+export function createGuideClient(options: EquiviqGuidesOptions, resolveCredentials?: () => Promise<{ apiUrl?: string | null; apiKey?: string | null } | null>) {
+  async function configuration(): Promise<{ url: URL; key: string } | null> {
+    const stored = await resolveCredentials?.().catch((): null => null)
+    const hasStoredConnection = Boolean(stored?.apiUrl && stored?.apiKey)
+    const rawURL = hasStoredConnection ? stored!.apiUrl : process.env[options.apiUrlEnv]
+    const key = hasStoredConnection ? stored!.apiKey : process.env[options.apiKeyEnv]
     if (!rawURL || !key) return null
     try {
       const url = new URL(rawURL)
@@ -56,7 +58,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
   }
 
   async function request<T>(path = '', search = ''): Promise<T | null> {
-    const configured = configuration()
+    const configured = await configuration()
     if (!configured) return null
     const { url, key } = configured
     url.pathname = `${url.pathname.replace(/\/$/, '')}${path ? `/${path}` : ''}`
@@ -93,7 +95,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
 
   async function getImage(article: string, image: string): Promise<Response | null> {
     if (!uuid.test(article) || !uuid.test(image)) return null
-    const configured = configuration()
+    const configured = await configuration()
     if (!configured) return null
     const { url, key } = configured
     url.pathname = `${url.pathname.replace(/\/$/, '')}/${article}/images/${image}`
@@ -112,7 +114,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
 
   async function recordView(slug: string, eventID: string, referrer: string): Promise<boolean> {
     if (!guideSlug.test(slug) || !uuid.test(eventID)) return false
-    const configured = configuration()
+    const configured = await configuration()
     if (!configured) return false
     const { url, key } = configured
     url.pathname = `${url.pathname.replace(/\/$/, '')}/${encodeURIComponent(slug)}/views`
@@ -126,7 +128,7 @@ export function createGuideClient(options: EquiviqGuidesOptions) {
   }
 
   async function getFacets(): Promise<GuideFacets | null> {
-    const configured = configuration()
+    const configured = await configuration()
     if (!configured) return null
     const { url, key } = configured
     url.pathname = url.pathname.replace(/\/guides\/?$/, '/guide-facets')

@@ -6,9 +6,35 @@ copied into Payload collections or its search index.
 
 ## Configuration
 
-Set the guide list API URL and API key as **server environment variables** on
-the host running Payload. The key must be treated as a secret. This works on
-Cloudflare Workers, a Node server, Docker, or another Payload deployment.
+Install this private package from the Equiviq GitHub repository in a Payload 3
+project. The package includes compiled JavaScript, TypeScript declarations,
+styles, and the Equiviq callout artwork; consumers do not need to compile its
+TypeScript source.
+
+```sh
+pnpm add git+https://github.com/imseanbrown/equiviq-payload-guides.git
+```
+
+Payload requires a one-time plugin registration in its configuration. After
+that, editors set the connection and place or configure content blocks in the
+admin UI. A custom frontend still needs to render its Payload Pages; the
+equiviq.com Next.js integration is the reference adapter for index and article
+permalinks. The package does not alter unrelated frontend routes.
+
+The plugin has two layers:
+
+1. **Connection** — In Payload admin, open Globals → Equiviq Guides. Paste the
+   Guides API URL and an Equiviq API key, save, then click **Test connection**.
+   The key is encrypted with Payload's server secret, cannot be read back from
+   the admin/API, and can be replaced by entering a new key. Keep the Payload
+   secret stable across deployments. The same configuration works on Cloudflare
+   Workers, Node, Docker, or another Payload host.
+2. **Content** — Add an Equiviq Guides block to a Page. Each block controls its
+   own filters, categorization, metadata, and callout style. The block fetches
+   content from Equiviq on request rather than copying articles into Payload.
+
+An existing environment-variable configuration remains supported as a fallback
+until the admin connection is saved.
 
 ```ts
 import { equiviqGuidesPlugin } from '@equiviq/payload-guides'
@@ -24,9 +50,11 @@ equiviqGuidesPlugin(options)
 
 For the test tenant, `EQUIVIQ_GUIDES_API_URL` is
 `https://dev.equiviq.com/api/public/plugins/equiviq-payload/org-000002/guides`.
-Create a key in Equiviq's Payload plugin settings. Place it in the host's
-secret manager; never put it in `NEXT_PUBLIC_*`, a Payload Global, or a client
-component. The plugin records only the variable names in Payload's config.
+Create a key in Equiviq's Payload plugin settings. Paste it into Payload's
+Equiviq Guides connection settings, or use the host's secret manager for the
+legacy environment-variable setup. Never put it in `NEXT_PUBLIC_*` or a client
+component. Payload stores only authenticated ciphertext when configured in the
+admin UI.
 
 The plugin adds an **Equiviq Guides** block to the Pages layout and an
 **Equiviq Guides** settings page in Payload. Add the block to any number of
