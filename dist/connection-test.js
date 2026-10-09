@@ -22,7 +22,7 @@ function ConnectionTest() {
   }
   return /* @__PURE__ */ jsxs("div", { style: { marginBlock: "1.5rem", padding: "1.25rem", border: "1px solid var(--theme-elevation-150)", borderRadius: 12 }, children: [
     /* @__PURE__ */ jsx("strong", { children: "Connection status" }),
-    /* @__PURE__ */ jsx("p", { style: { marginBlock: ".5rem 1rem" }, children: "Save the API URL and key, then test the server connection." }),
+    /* @__PURE__ */ jsx("p", { style: { marginBlock: ".5rem 1rem" }, children: "Test the saved connection, or the existing server-secret connection if these fields are empty." }),
     /* @__PURE__ */ jsx("button", { type: "button", className: "btn btn--style-primary", disabled: busy, onClick: test, children: busy ? "Checking connection\u2026" : "Test connection" }),
     result && /* @__PURE__ */ jsx("p", { role: "status", style: { marginTop: "1rem", color: result.ok ? "var(--theme-success-700)" : "var(--theme-error-700)" }, children: result.message })
   ] });

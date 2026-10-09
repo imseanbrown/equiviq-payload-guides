@@ -50,18 +50,22 @@ var equiviqGuidesBlock = {
 var equiviqGuidesSettings = {
   slug: "equiviq-guides-settings",
   label: "Equiviq Guides",
-  admin: { description: "Connect to Equiviq, then place an Equiviq Guides block on a published page. The API key is encrypted and is never displayed again after saving." },
+  admin: { description: "Connect to Equiviq, then place an Equiviq Guides block on a published page. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active." },
   access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
   endpoints: [{ path: "/test-connection", method: "post", handler: async (req) => {
     if (!req.user) return Response.json({ message: "Sign in to test the connection." }, { status: 401 });
     const settings = await req.payload.findGlobal({ slug: "equiviq-guides-settings", depth: 0, context: { equiviqGuidesInternal: true } });
-    if (!settings.apiUrl || !settings.apiKey) return Response.json({ message: "Save an API URL and key before testing." }, { status: 400 });
+    const names = req.payload.config.custom?.equiviqGuides;
+    const saved = Boolean(settings.apiUrl && settings.apiKey);
+    const apiUrl = saved ? settings.apiUrl : names?.apiUrlEnv ? process.env[names.apiUrlEnv] : void 0;
+    const apiKey = saved ? settings.apiKey : names?.apiKeyEnv ? process.env[names.apiKeyEnv] : void 0;
+    if (!apiUrl || !apiKey) return Response.json({ message: "Save an API URL and key before testing." }, { status: 400 });
     try {
-      const response = await fetch(settings.apiUrl, { headers: { Authorization: `Bearer ${settings.apiKey}`, Accept: "application/json" }, cache: "no-store", signal: AbortSignal.timeout(7e3) });
+      const response = await fetch(apiUrl, { headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" }, cache: "no-store", signal: AbortSignal.timeout(7e3) });
       if (!response.ok) return Response.json({ message: response.status === 401 || response.status === 403 ? "Equiviq rejected this API key." : `Equiviq returned HTTP ${response.status}.` }, { status: 502 });
       const body = await response.json();
       if (!Array.isArray(body.guides)) return Response.json({ message: "Equiviq returned an unexpected response." }, { status: 502 });
-      return Response.json({ message: "Connected to Equiviq. Guides are available to your content blocks." });
+      return Response.json({ message: `Connected to Equiviq using ${saved ? "saved settings" : "server secrets"}. Guides are available to your content blocks.` });
     } catch {
       return Response.json({ message: "Could not reach Equiviq. Check the API URL and try again." }, { status: 502 });
     }
