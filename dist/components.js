@@ -119,8 +119,7 @@ function GuideArticle({ article, basePath, canonicalURL, settings }) {
       /* @__PURE__ */ jsxs("header", { className: "equiviq-guide-heading", children: [
         /* @__PURE__ */ jsx("a", { className: "equiviq-guide-back", href: basePath, children: "\u2190 All guides" }),
         /* @__PURE__ */ jsx("p", { className: "equiviq-guide-eyebrow", children: "Guides & Resources" }),
-        /* @__PURE__ */ jsx("h1", { children: article.title }),
-        visible(settings?.classification, "visibility") && /* @__PURE__ */ jsx("span", { className: "equiviq-guide-status", children: article.visibility_label })
+        /* @__PURE__ */ jsx("h1", { children: article.title })
       ] }),
       settings?.classification?.show !== false && /* @__PURE__ */ jsxs("section", { className: "equiviq-guide-classification", "aria-label": "Article details", children: [
         /* @__PURE__ */ jsxs("dl", { children: [
@@ -163,6 +162,10 @@ function GuideArticle({ article, basePath, canonicalURL, settings }) {
         /* @__PURE__ */ jsx("h2", { children: section.title }),
         /* @__PURE__ */ jsx(ReactMarkdown, { remarkPlugins: [remarkGfm], components: {
           blockquote: ({ children }) => /* @__PURE__ */ jsx(GuideBlockquote, { style: settings?.calloutStyle === "theme" ? "theme" : "equiviq", children }),
+          table: ({ children }) => /* @__PURE__ */ jsxs("div", { className: "equiviq-guide-table-frame", children: [
+            /* @__PURE__ */ jsx("p", { className: "equiviq-guide-table-hint", "aria-hidden": "true", children: "Swipe to see all columns \u2192" }),
+            /* @__PURE__ */ jsx("div", { className: "equiviq-guide-table-scroll", role: "region", "aria-label": "Guide table; scroll horizontally to see all columns", tabIndex: 0, children: /* @__PURE__ */ jsx("table", { children }) })
+          ] }),
           img: ({ src, alt }) => {
             const source = typeof src === "string" ? src : void 0;
             const match = source?.match(/\/knowledge\/article-images\/guides-resources\/([0-9a-f-]{36})/i);

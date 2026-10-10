@@ -105,7 +105,6 @@ export function GuideArticle({ article, basePath, canonicalURL, settings }: { ar
         <a className="equiviq-guide-back" href={basePath}>← All guides</a>
         <p className="equiviq-guide-eyebrow">Guides &amp; Resources</p>
         <h1>{article.title}</h1>
-        {visible(settings?.classification, 'visibility') && <span className="equiviq-guide-status">{article.visibility_label}</span>}
       </header>
       {settings?.classification?.show !== false && <section className="equiviq-guide-classification" aria-label="Article details">
         <dl>
@@ -125,6 +124,10 @@ export function GuideArticle({ article, basePath, canonicalURL, settings }: { ar
           <h2>{section.title}</h2>
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={{
             blockquote: ({ children }) => <GuideBlockquote style={settings?.calloutStyle === 'theme' ? 'theme' : 'equiviq'}>{children}</GuideBlockquote>,
+            table: ({ children }) => <div className="equiviq-guide-table-frame">
+              <p className="equiviq-guide-table-hint" aria-hidden="true">Swipe to see all columns →</p>
+              <div className="equiviq-guide-table-scroll" role="region" aria-label="Guide table; scroll horizontally to see all columns" tabIndex={0}><table>{children}</table></div>
+            </div>,
             img: ({ src, alt }) => {
               const source = typeof src === 'string' ? src : undefined
               const match = source?.match(/\/knowledge\/article-images\/guides-resources\/([0-9a-f-]{36})/i)

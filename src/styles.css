@@ -2,6 +2,7 @@
 .equiviq-guide-card{width:min(100%,960px);margin:0 auto 1.25rem;padding:clamp(1.5rem,4vw,3rem);background:#fff;border:1px solid #e3e7ee;border-radius:18px;box-shadow:0 12px 38px rgba(25,35,55,.06)}
 .equiviq-guide-eyebrow{margin:0;color:var(--accent,#4b0082);font-size:.76rem;font-weight:750;letter-spacing:.13em;text-transform:uppercase}
 .equiviq-guide-index h1,.equiviq-guide-heading h1{margin:.5rem 0 1rem;font-size:clamp(2rem,4vw,3rem);line-height:1.15;letter-spacing:-.035em}
+.equiviq-guide-heading h1{max-width:none}
 .equiviq-guide-intro{margin:0 0 2rem;color:#566276;font-size:1.08rem;line-height:1.6}
 .equiviq-guide-search{padding:1.5rem;background:#f8f9fb;border:1px solid #e3e7ee;border-radius:12px}
 .equiviq-guide-search label{display:block;margin-bottom:.65rem;font-weight:700}
@@ -23,7 +24,6 @@
 .equiviq-guide-list span{color:#667085;font-size:.85rem;white-space:nowrap}
 .equiviq-guide-empty{padding:2rem 0;color:#667085}
 .equiviq-guide-back{display:inline-block;margin-bottom:1.3rem;font-size:.88rem;font-weight:700}
-.equiviq-guide-status{display:inline-block;padding:.35rem .8rem;border-radius:999px;background:#e9f4eb;color:#28603b;font-size:.78rem;font-weight:750}
 .equiviq-guide-classification{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin:1.6rem 0 0;padding:1.5rem 0;border-top:1px solid #dfe4eb;border-bottom:1px solid #dfe4eb}
 .equiviq-guide-classification dl{display:grid;align-content:start;gap:1rem;margin:0}
 .equiviq-guide-classification dt,.equiviq-guide-metadata dt{margin:0 0 .2rem;color:#667085;font-size:.74rem;font-weight:750;letter-spacing:.075em;text-transform:uppercase}
@@ -55,10 +55,15 @@
 .equiviq-guide-section pre{max-width:100%;overflow:auto;padding:1rem;border-radius:8px;background:#f2f4f7}
 .equiviq-guide-section code{overflow-wrap:anywhere}
 .equiviq-guide-section img{max-width:100%;height:auto;border-radius:6px}
-.equiviq-guide-section table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}
-.equiviq-guide-section th,.equiviq-guide-section td{padding:.55rem .75rem;border:1px solid #dfe4eb;text-align:left}
+.equiviq-guide-table-frame{max-width:100%;margin:1rem 0}
+.equiviq-guide-table-hint{display:none}
+.equiviq-guide-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.equiviq-guide-table-scroll:focus-visible{outline:3px solid var(--accent,#4b0082);outline-offset:2px}
+.equiviq-guide-section table{width:100%;min-width:38rem;border-collapse:collapse;table-layout:auto}
+.equiviq-guide-section th,.equiviq-guide-section td{padding:.55rem .75rem;border:1px solid #dfe4eb;text-align:left;vertical-align:top;overflow-wrap:break-word;word-break:normal}
+.equiviq-guide-section th:first-child,.equiviq-guide-section td:first-child{min-width:8rem}
 .equiviq-guide-metadata h2{margin:0 0 1.3rem;font-size:1.15rem}
 .equiviq-guide-metadata dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.2rem 2rem;margin:0}
 .equiviq-guide-permalink{grid-column:1/-1}
-@media(max-width:680px){.equiviq-guide-list a,.equiviq-guide-result-heading{display:block}.equiviq-guide-list span{display:block;margin-top:.3rem;white-space:normal}.equiviq-guide-classification,.equiviq-guide-metadata dl{grid-template-columns:1fr}.equiviq-guide-search>div{flex-direction:column}}
-@media print{@page{margin:.7in}.equiviq-guide-shell{padding:0;background:#fff}.equiviq-guide-card{width:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}.equiviq-guide-back,.equiviq-guide-search{display:none}.equiviq-guide-heading{break-inside:avoid-page}.equiviq-guide-heading h1{font-size:24pt}.equiviq-guide-section{font-size:10.75pt;line-height:1.45}.equiviq-guide-section h2{break-after:avoid-page;font-size:14pt}.equiviq-guide-section p{orphans:3;widows:3}.equiviq-guide-section img,.equiviq-guide-section pre,.equiviq-guide-section blockquote,.equiviq-guide-section table{break-inside:avoid-page}.equiviq-guide-metadata{margin-top:14pt;padding:9pt 10pt}}
+@media(max-width:680px){.equiviq-guide-list a,.equiviq-guide-result-heading{display:block}.equiviq-guide-list span{display:block;margin-top:.3rem;white-space:normal}.equiviq-guide-classification,.equiviq-guide-metadata dl{grid-template-columns:1fr}.equiviq-guide-search>div{flex-direction:column}.equiviq-guide-table-hint{display:block;margin:0 0 .35rem;color:#667085;font-size:.8rem;text-align:right}}
+@media print{@page{margin:.7in}.equiviq-guide-shell{padding:0;background:#fff}.equiviq-guide-card{width:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}.equiviq-guide-back,.equiviq-guide-search,.equiviq-guide-table-hint{display:none}.equiviq-guide-heading{break-inside:avoid-page}.equiviq-guide-heading h1{font-size:24pt}.equiviq-guide-section{font-size:10.75pt;line-height:1.45}.equiviq-guide-section h2{break-after:avoid-page;font-size:14pt}.equiviq-guide-section p{orphans:3;widows:3}.equiviq-guide-table-scroll{overflow:visible}.equiviq-guide-section table{min-width:0;table-layout:fixed}.equiviq-guide-section th:first-child,.equiviq-guide-section td:first-child{min-width:0}.equiviq-guide-section img,.equiviq-guide-section pre,.equiviq-guide-section blockquote,.equiviq-guide-table-frame{break-inside:avoid-page}.equiviq-guide-metadata{margin-top:14pt;padding:9pt 10pt}}
