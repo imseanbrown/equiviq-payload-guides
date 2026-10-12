@@ -9,4 +9,6 @@ export type EquiviqGuidesOptions = {
 };
 export declare const equiviqGuidesBlock: Block;
 export declare const equiviqGuidesSettings: GlobalConfig;
+export declare const equiviqKnowledgeSettings: GlobalConfig;
+export declare const equiviqLeadSettings: GlobalConfig;
 export declare function equiviqGuidesPlugin(options: EquiviqGuidesOptions): (config: Config) => Config;

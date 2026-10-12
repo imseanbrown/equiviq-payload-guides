@@ -130,7 +130,7 @@ export const equiviqLeadQueue: CollectionConfig = {
 
 export function createLeadCTACollection(options: EquiviqGuidesOptions): CollectionConfig {
   return {
-    slug: 'equiviq-lead-ctas', labels: { singular: 'Lead Generation CTA', plural: 'Lead Generation' },
+    slug: 'equiviq-lead-ctas', labels: { singular: 'Call to Action', plural: 'Calls to Action' },
     admin: { group: 'Equiviq', useAsTitle: 'heading', description: 'Configure a form, then select it in an Equiviq Lead Form block.' },
     access: { read: ({ req }) => Boolean(req.user), create: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user), delete: ({ req }) => Boolean(req.user) },
     hooks: { afterRead: [async ({ doc, req }) => {

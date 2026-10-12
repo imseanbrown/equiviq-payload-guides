@@ -133,7 +133,7 @@ var equiviqLeadQueue = {
 function createLeadCTACollection(options) {
   return {
     slug: "equiviq-lead-ctas",
-    labels: { singular: "Lead Generation CTA", plural: "Lead Generation" },
+    labels: { singular: "Call to Action", plural: "Calls to Action" },
     admin: { group: "Equiviq", useAsTitle: "heading", description: "Configure a form, then select it in an Equiviq Lead Form block." },
     access: { read: ({ req }) => Boolean(req.user), create: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user), delete: ({ req }) => Boolean(req.user) },
     hooks: { afterRead: [async ({ doc, req }) => {
@@ -271,8 +271,8 @@ var equiviqGuidesBlock = {
 };
 var equiviqGuidesSettings = {
   slug: "equiviq-guides-settings",
-  label: "Knowledge & Connection",
-  admin: { group: "Equiviq", description: "Connect to Equiviq, then place a Guides or Lead Form block on a published page. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active." },
+  label: "Settings",
+  admin: { group: "Equiviq", description: "Connect Knowledge and Lead Generation to Equiviq. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active." },
   access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
   endpoints: [{ path: "/test-connection", method: "post", handler: async (req) => {
     if (!req.user) return Response.json({ message: "Sign in to test the connection." }, { status: 401 });
@@ -292,32 +292,7 @@ var equiviqGuidesSettings = {
       return Response.json({ message: "Could not reach Equiviq. Check the API URL and try again." }, { status: 502 });
     }
   } }],
-  hooks: { beforeChange: [async ({ data, originalDoc, req }) => {
-    const previous = typeof originalDoc?.primaryPage === "object" ? originalDoc.primaryPage?.id : originalDoc?.primaryPage;
-    const selected = typeof data.primaryPage === "object" ? data.primaryPage?.id : data.primaryPage;
-    if (selected) {
-      const page = await req.payload.findByID({ collection: "pages", id: selected, depth: 0, req });
-      if (!page?.layout?.some((block) => block.blockType === "equiviqGuides")) {
-        throw new Error("The primary page must contain an Equiviq Guides block");
-      }
-    }
-    if (previous && previous !== selected) {
-      const oldPage = await req.payload.findByID({ collection: "pages", id: previous, depth: 0, req }).catch(() => null);
-      if (oldPage?.slug && oldPage.slug !== "home") {
-        const history = Array.isArray(originalDoc?.legacyPaths) ? originalDoc.legacyPaths : [];
-        data.legacyPaths = [...history.filter((item) => item.path !== `/${oldPage.slug}`), { path: `/${oldPage.slug}` }];
-      }
-    }
-    return data;
-  }] },
   fields: [
-    {
-      name: "privacyPolicyUrl",
-      label: "Site privacy policy URL",
-      type: "text",
-      admin: { description: "Used by lead forms unless a CTA overrides it. Forms require a privacy policy link." },
-      validate: (value) => !value || typeof value === "string" && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value) ? true : "Enter an HTTPS privacy policy URL."
-    },
     {
       name: "apiUrl",
       label: "Equiviq API URL",
@@ -344,6 +319,37 @@ var equiviqGuidesSettings = {
       }
     },
     { name: "connectionTest", type: "ui", admin: { components: { Field: "@equiviq/payload-guides/connection-test#ConnectionTest" } } },
+    // Retain existing values for sites upgrading from the combined settings screen.
+    { name: "privacyPolicyUrl", type: "text", admin: { hidden: true } },
+    { name: "primaryPage", type: "relationship", relationTo: "pages", admin: { hidden: true } },
+    { name: "legacyPaths", type: "array", admin: { hidden: true }, fields: [{ name: "path", type: "text", required: true }] }
+  ]
+};
+var equiviqKnowledgeSettings = {
+  slug: "equiviq-knowledge-settings",
+  label: "Knowledge",
+  admin: { group: "Equiviq", description: "Choose the canonical page for published guides." },
+  access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
+  hooks: { beforeChange: [async ({ data, originalDoc, req }) => {
+    const previous = typeof originalDoc?.primaryPage === "object" ? originalDoc.primaryPage?.id : originalDoc?.primaryPage;
+    const selected = typeof data.primaryPage === "object" ? data.primaryPage?.id : data.primaryPage;
+    if (selected) {
+      const page = await req.payload.findByID({ collection: "pages", id: selected, depth: 0, req });
+      if (!page?.layout?.some((block) => block.blockType === "equiviqGuides")) {
+        throw new Error("The primary page must contain an Equiviq Guides block");
+      }
+    }
+    if (previous && previous !== selected) {
+      const oldPage = await req.payload.findByID({ collection: "pages", id: previous, depth: 0, req }).catch(() => null);
+      if (oldPage?.slug && oldPage.slug !== "home") {
+        const history = Array.isArray(originalDoc?.legacyPaths) ? originalDoc.legacyPaths : [];
+        data.legacyPaths = [...history.filter((item) => item.path !== `/${oldPage.slug}`), { path: `/${oldPage.slug}` }];
+      }
+    }
+    return { ...data, configured: true };
+  }] },
+  fields: [
+    { name: "configured", type: "checkbox", admin: { hidden: true }, defaultValue: false },
     {
       name: "primaryPage",
       label: "Primary guide page",
@@ -352,6 +358,23 @@ var equiviqGuidesSettings = {
       admin: { description: "This page must contain an Equiviq Guides block. Other pages may also contain the block; search engines will use this page as the canonical article location." }
     },
     { name: "legacyPaths", type: "array", admin: { hidden: true }, fields: [{ name: "path", type: "text", required: true }] }
+  ]
+};
+var equiviqLeadSettings = {
+  slug: "equiviq-lead-settings",
+  label: "Lead Generation",
+  admin: { group: "Equiviq", description: "Set the default privacy policy for lead forms. Configure individual CTAs in Lead Generation CTAs." },
+  access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
+  hooks: { beforeChange: [({ data }) => ({ ...data, configured: true })] },
+  fields: [
+    { name: "configured", type: "checkbox", admin: { hidden: true }, defaultValue: false },
+    {
+      name: "privacyPolicyUrl",
+      label: "Site privacy policy URL",
+      type: "text",
+      admin: { description: "Used by lead forms unless a CTA overrides it. Forms require a privacy policy link." },
+      validate: (value) => !value || typeof value === "string" && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value) ? true : "Enter an HTTPS privacy policy URL."
+    }
   ]
 };
 function equiviqGuidesPlugin(options) {
@@ -372,7 +395,7 @@ function equiviqGuidesPlugin(options) {
     return {
       ...config,
       collections: [...collections, createLeadCTACollection(options), equiviqLeadQueue],
-      globals: [...config.globals || [], equiviqGuidesSettings],
+      globals: [...config.globals || [], equiviqGuidesSettings, equiviqKnowledgeSettings, equiviqLeadSettings],
       custom: { ...config.custom, equiviqGuides: { apiUrlEnv: options.apiUrlEnv, apiKeyEnv: options.apiKeyEnv } }
     };
   };
@@ -380,5 +403,7 @@ function equiviqGuidesPlugin(options) {
 export {
   equiviqGuidesBlock,
   equiviqGuidesPlugin,
-  equiviqGuidesSettings
+  equiviqGuidesSettings,
+  equiviqKnowledgeSettings,
+  equiviqLeadSettings
 };

@@ -40,8 +40,8 @@ export const equiviqGuidesBlock: Block = {
 
 export const equiviqGuidesSettings: GlobalConfig = {
   slug: 'equiviq-guides-settings',
-  label: 'Knowledge & Connection',
-  admin: { group: 'Equiviq', description: 'Connect to Equiviq, then place a Guides or Lead Form block on a published page. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active.' },
+  label: 'Settings',
+  admin: { group: 'Equiviq', description: 'Connect Knowledge and Lead Generation to Equiviq. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active.' },
   access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
   endpoints: [{ path: '/test-connection', method: 'post', handler: async (req) => {
     if (!req.user) return Response.json({ message: 'Sign in to test the connection.' }, { status: 401 })
@@ -59,6 +59,34 @@ export const equiviqGuidesSettings: GlobalConfig = {
       return Response.json({ message: `Connected to Equiviq using ${saved ? 'saved settings' : 'server secrets'}. Guides are available to your content blocks.` })
     } catch { return Response.json({ message: 'Could not reach Equiviq. Check the API URL and try again.' }, { status: 502 }) }
   } }],
+  fields: [
+  { name: 'apiUrl', label: 'Equiviq API URL', type: 'text', admin: { description: 'Paste the HTTPS Guides API URL from the Equiviq Payload plugin settings.' },
+    validate: (value: unknown) => {
+      if (!value) return true
+      try {
+        const url = new URL(String(value))
+        return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash && /\/api\/public\/plugins\/equiviq-payload\/[^/]+\/guides\/?$/.test(url.pathname)
+          ? true : 'Enter the HTTPS Guides API URL shown in Equiviq.'
+      } catch { return 'Enter a valid HTTPS Guides API URL.' }
+    } },
+  { name: 'apiKey', label: 'Equiviq API key', type: 'text', admin: { description: 'Paste a new API key to set or rotate it. Leave blank to keep the existing key. It will never be displayed again.' },
+    hooks: {
+      beforeChange: [({ value, previousValue, req }) => value ? encryptGuideKey(String(value), req.payload.secret) : previousValue],
+      afterRead: [({ value, req }) => req.context?.equiviqGuidesInternal === true && value ? decryptGuideKey(String(value), req.payload.secret) : null],
+    } },
+  { name: 'connectionTest', type: 'ui', admin: { components: { Field: '@equiviq/payload-guides/connection-test#ConnectionTest' } } },
+  // Retain existing values for sites upgrading from the combined settings screen.
+  { name: 'privacyPolicyUrl', type: 'text', admin: { hidden: true } },
+  { name: 'primaryPage', type: 'relationship', relationTo: 'pages', admin: { hidden: true } },
+  { name: 'legacyPaths', type: 'array', admin: { hidden: true }, fields: [{ name: 'path', type: 'text', required: true }] },
+  ],
+}
+
+export const equiviqKnowledgeSettings: GlobalConfig = {
+  slug: 'equiviq-knowledge-settings',
+  label: 'Knowledge',
+  admin: { group: 'Equiviq', description: 'Choose the canonical page for published guides.' },
+  access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
   hooks: { beforeChange: [async ({ data, originalDoc, req }) => {
     const previous = typeof originalDoc?.primaryPage === 'object' ? originalDoc.primaryPage?.id : originalDoc?.primaryPage
     const selected = typeof data.primaryPage === 'object' ? data.primaryPage?.id : data.primaryPage
@@ -75,30 +103,27 @@ export const equiviqGuidesSettings: GlobalConfig = {
         data.legacyPaths = [...history.filter((item: { path?: string }) => item.path !== `/${oldPage.slug}`), { path: `/${oldPage.slug}` }]
       }
     }
-    return data
+    return { ...data, configured: true }
   }] },
   fields: [
-  { name: 'privacyPolicyUrl', label: 'Site privacy policy URL', type: 'text', admin: { description: 'Used by lead forms unless a CTA overrides it. Forms require a privacy policy link.' },
-    validate: (value: unknown) => !value || (typeof value === 'string' && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value)) ? true : 'Enter an HTTPS privacy policy URL.' },
-  { name: 'apiUrl', label: 'Equiviq API URL', type: 'text', admin: { description: 'Paste the HTTPS Guides API URL from the Equiviq Payload plugin settings.' },
-    validate: (value: unknown) => {
-      if (!value) return true
-      try {
-        const url = new URL(String(value))
-        return url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash && /\/api\/public\/plugins\/equiviq-payload\/[^/]+\/guides\/?$/.test(url.pathname)
-          ? true : 'Enter the HTTPS Guides API URL shown in Equiviq.'
-      } catch { return 'Enter a valid HTTPS Guides API URL.' }
-    } },
-  { name: 'apiKey', label: 'Equiviq API key', type: 'text', admin: { description: 'Paste a new API key to set or rotate it. Leave blank to keep the existing key. It will never be displayed again.' },
-    hooks: {
-      beforeChange: [({ value, previousValue, req }) => value ? encryptGuideKey(String(value), req.payload.secret) : previousValue],
-      afterRead: [({ value, req }) => req.context?.equiviqGuidesInternal === true && value ? decryptGuideKey(String(value), req.payload.secret) : null],
-    } },
-  { name: 'connectionTest', type: 'ui', admin: { components: { Field: '@equiviq/payload-guides/connection-test#ConnectionTest' } } },
+  { name: 'configured', type: 'checkbox', admin: { hidden: true }, defaultValue: false },
   {
     name: 'primaryPage', label: 'Primary guide page', type: 'relationship', relationTo: 'pages',
     admin: { description: 'This page must contain an Equiviq Guides block. Other pages may also contain the block; search engines will use this page as the canonical article location.' },
   }, { name: 'legacyPaths', type: 'array', admin: { hidden: true }, fields: [{ name: 'path', type: 'text', required: true }] },
+  ],
+}
+
+export const equiviqLeadSettings: GlobalConfig = {
+  slug: 'equiviq-lead-settings',
+  label: 'Lead Generation',
+  admin: { group: 'Equiviq', description: 'Set the default privacy policy for lead forms. Configure individual CTAs in Lead Generation CTAs.' },
+  access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
+  hooks: { beforeChange: [({ data }) => ({ ...data, configured: true })] },
+  fields: [
+    { name: 'configured', type: 'checkbox', admin: { hidden: true }, defaultValue: false },
+    { name: 'privacyPolicyUrl', label: 'Site privacy policy URL', type: 'text', admin: { description: 'Used by lead forms unless a CTA overrides it. Forms require a privacy policy link.' },
+      validate: (value: unknown) => !value || (typeof value === 'string' && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value)) ? true : 'Enter an HTTPS privacy policy URL.' },
   ],
 }
 
@@ -120,7 +145,7 @@ export function equiviqGuidesPlugin(options: EquiviqGuidesOptions) {
     return {
       ...config,
       collections: [...collections, createLeadCTACollection(options), equiviqLeadQueue],
-      globals: [...(config.globals || []), equiviqGuidesSettings],
+      globals: [...(config.globals || []), equiviqGuidesSettings, equiviqKnowledgeSettings, equiviqLeadSettings],
       custom: { ...config.custom, equiviqGuides: { apiUrlEnv: options.apiUrlEnv, apiKeyEnv: options.apiKeyEnv } },
     }
   }
