@@ -12,7 +12,7 @@ styles, and the Equiviq callout artwork; consumers do not need to compile its
 TypeScript source.
 
 ```sh
-pnpm add 'git+https://github.com/imseanbrown/equiviq-payload-guides.git#v0.3.5'
+pnpm add 'git+https://github.com/imseanbrown/payload-equiviq.git#v0.3.5'
 ```
 
 The Git tag pins an exact package version. Payload has no WordPress-style
