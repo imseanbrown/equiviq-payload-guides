@@ -122,6 +122,8 @@ export const equiviqLeadSettings: GlobalConfig = {
   hooks: { beforeChange: [({ data }) => ({ ...data, configured: true })] },
   fields: [
     { name: 'configured', type: 'checkbox', admin: { hidden: true }, defaultValue: false },
+    { name: 'blockFreeEmailDomains', label: 'Block free email domains', type: 'checkbox', defaultValue: true,
+      admin: { description: 'When disabled, a free-domain submission creates or updates a person without creating or assigning an organization.' } },
     { name: 'privacyPolicyUrl', label: 'Site privacy policy URL', type: 'text', admin: { description: 'Used by lead forms unless a CTA overrides it. Forms require a privacy policy link.' },
       validate: (value: unknown) => !value || (typeof value === 'string' && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value)) ? true : 'Enter an HTTPS privacy policy URL.' },
   ],

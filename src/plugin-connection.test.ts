@@ -14,6 +14,7 @@ describe('Equiviq Guides admin connection', () => {
     expect(visible(equiviqGuidesSettings.fields)).not.toContain('primaryPage')
     expect(visible(equiviqKnowledgeSettings.fields)).toContain('primaryPage')
     expect(visible(equiviqLeadSettings.fields)).toContain('privacyPolicyUrl')
+    expect(visible(equiviqLeadSettings.fields)).toContain('blockFreeEmailDomains')
   })
   it('keeps the key out of admin reads and preserves it when the field is left empty', () => {
     const stored = keyField.hooks.beforeChange[0]({ value: 'private-api-key', req })

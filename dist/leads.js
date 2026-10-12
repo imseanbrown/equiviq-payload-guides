@@ -132,6 +132,8 @@ function createLeadCTACollection(options) {
         const matches = await req.payload.find({ collection: "equiviq-lead-ctas", where: { slug: { equals: slug } }, limit: 1, depth: 0, overrideAccess: true });
         const cta = matches.docs[0];
         if (!cta) return response(404, "This form is unavailable.");
+        const leadSettings = await req.payload.findGlobal({ slug: "equiviq-lead-settings", depth: 0, overrideAccess: true });
+        const blockFreeEmailDomains = leadSettings.blockFreeEmailDomains !== false;
         const elapsed = Date.now() - Number(input.started || 0);
         if (readText(input, "website", 100) || !Number.isFinite(elapsed) || elapsed < 2e3 || elapsed > 24 * 3600 * 1e3) return response(422, cta.errorMessage || "Please try again.");
         const page = cleanURL(input.source_url);
@@ -143,10 +145,10 @@ function createLeadCTACollection(options) {
         for (const field of fieldNames) {
           if (visible(cta, field) && required(cta, field) && !readText(input, field, field === "organization" ? 240 : 120)) return response(422, `${fieldLabel[field]} is required.`);
         }
-        const check = await upstream(req, options, "lead-email-check", { email });
+        const check = await upstream(req, options, "lead-email-check", { email, block_free_email_domains: blockFreeEmailDomains });
         if (check.status === 200 && check.content?.allowed === false) return response(422, "Please use your work email address");
         if (check.status !== 200) return response(503, check.message || cta.errorMessage || "Please try again.");
-        const body = { submission_id: crypto.randomUUID(), cta_id: cta.slug, email, source_url: page, acquisition_source: cta.acquisitionSource || "" };
+        const body = { submission_id: crypto.randomUUID(), cta_id: cta.slug, email, source_url: page, acquisition_source: cta.acquisitionSource || "", block_free_email_domains: blockFreeEmailDomains };
         for (const field of ["given_name", "surname"]) {
           if (visible(cta, field)) body[field] = readText(input, field, 120);
         }
