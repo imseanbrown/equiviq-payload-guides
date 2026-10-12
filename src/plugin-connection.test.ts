@@ -9,7 +9,7 @@ const req = { payload: { secret: 'stable-payload-secret' }, context: {} }
 describe('Equiviq Guides admin connection', () => {
   it('keeps connection, knowledge, and lead settings in separate admin sections', () => {
     expect([equiviqGuidesSettings.label, equiviqKnowledgeSettings.label, equiviqLeadSettings.label]).toEqual(['Settings', 'Knowledge', 'Lead Generation'])
-    const visible = (fields: typeof equiviqGuidesSettings.fields) => fields.filter((field) => !('admin' in field && field.admin?.hidden)).map((field) => 'name' in field ? field.name : '')
+    const visible = (fields: typeof equiviqGuidesSettings.fields) => fields.filter((field) => !('admin' in field && (field.admin as { hidden?: boolean } | undefined)?.hidden)).map((field) => 'name' in field ? field.name : '')
     expect(visible(equiviqGuidesSettings.fields)).toContain('apiKey')
     expect(visible(equiviqGuidesSettings.fields)).not.toContain('primaryPage')
     expect(visible(equiviqKnowledgeSettings.fields)).toContain('primaryPage')

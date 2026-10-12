@@ -201,6 +201,7 @@ export function createLeadCTACollection(options: EquiviqGuidesOptions): Collecti
     fields: [
       { name: 'slug', type: 'text', required: true, unique: true, admin: { description: 'Stable ID used in submissions.' }, validate: (value: unknown) => typeof value === 'string' && idPattern.test(value) ? true : 'Use letters, numbers, underscores, and hyphens.' },
       { name: 'heading', type: 'text', required: true },
+      { name: 'ctaText', type: 'textarea', label: 'CTA text', admin: { description: 'Optional text shown below the heading and above the form fields.' } },
       { name: 'acquisitionSource', type: 'text', label: 'Acquisition Source/Campaign', maxLength: 200 },
       { name: 'privacyUrl', type: 'text', label: 'Privacy policy URL override', validate: (value: unknown) => !value || (typeof value === 'string' && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value)) ? true : 'Enter an HTTPS privacy policy URL.' },
       { name: 'successMessage', type: 'text' }, { name: 'errorMessage', type: 'text' }, { name: 'queuedMessage', type: 'text' },

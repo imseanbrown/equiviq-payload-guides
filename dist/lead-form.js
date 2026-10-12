@@ -67,6 +67,7 @@ function EquiviqLeadForm({ cta, privacyPolicyUrl }) {
   };
   return /* @__PURE__ */ jsxs("form", { className: "equiviq-lead-form", onSubmit: submit, children: [
     /* @__PURE__ */ jsx("h2", { children: cta.heading }),
+    cta.ctaText && /* @__PURE__ */ jsx("p", { className: "equiviq-lead-cta-text", style: { whiteSpace: "pre-line" }, children: cta.ctaText }),
     /* @__PURE__ */ jsx("div", { "aria-hidden": "true", className: "equiviq-lead-honeypot", children: /* @__PURE__ */ jsxs("label", { children: [
       "Leave blank",
       /* @__PURE__ */ jsx("input", { name: "website", autoComplete: "off", tabIndex: -1 })

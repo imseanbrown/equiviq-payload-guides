@@ -6,6 +6,7 @@ import { getCountries, getCountryCallingCode, parsePhoneNumberFromString, type C
 type CTA = {
   slug: string
   heading: string
+  ctaText?: string | null
   privacyUrl?: string | null
   successMessage?: string | null
   errorMessage?: string | null
@@ -61,6 +62,7 @@ export function EquiviqLeadForm({ cta, privacyPolicyUrl }: { cta: CTA; privacyPo
   }
   return <form className="equiviq-lead-form" onSubmit={submit}>
     <h2>{cta.heading}</h2>
+    {cta.ctaText && <p className="equiviq-lead-cta-text" style={{ whiteSpace: 'pre-line' }}>{cta.ctaText}</p>}
     <div aria-hidden="true" className="equiviq-lead-honeypot"><label>Leave blank<input name="website" autoComplete="off" tabIndex={-1} /></label></div>
     {(cta.fields?.given_name?.visible || cta.fields?.surname?.visible) && <div className="equiviq-lead-name-row">{field('given_name')}{field('surname')}</div>}
     {field('email')}{field('organization')}{field('phone')}

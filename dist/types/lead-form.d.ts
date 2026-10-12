@@ -1,6 +1,7 @@
 type CTA = {
     slug: string;
     heading: string;
+    ctaText?: string | null;
     privacyUrl?: string | null;
     successMessage?: string | null;
     errorMessage?: string | null;
