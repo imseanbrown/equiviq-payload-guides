@@ -6,14 +6,21 @@ copied into Payload collections or its search index.
 
 ## Configuration
 
-Install this private package from the Equiviq GitHub repository in a Payload 3
+Install this package from the public Equiviq GitHub repository in a Payload 3
 project. The package includes compiled JavaScript, TypeScript declarations,
 styles, and the Equiviq callout artwork; consumers do not need to compile its
 TypeScript source.
 
 ```sh
-pnpm add git+https://github.com/imseanbrown/equiviq-payload-guides.git
+pnpm add 'git+https://github.com/imseanbrown/equiviq-payload-guides.git#v0.3.1'
 ```
+
+The Git tag pins an exact package version. Payload has no WordPress-style
+in-application updater for site plugins. Check this repository's releases,
+change the Git tag in the host application's dependency, install, run any
+documented database migrations, and rebuild/deploy the host application.
+The `private` package setting prevents accidental npm registry publication;
+it does not restrict installation from this public Git repository.
 
 Payload requires a one-time plugin registration in its configuration. After
 that, editors set the connection and place or configure content blocks in the
@@ -67,6 +74,29 @@ server code and use `GuideIndex` and `GuideArticle` to render each placement.
 The guide image route should call `client.getImage(article, image)`. Import
 `@equiviq/payload-guides/styles.css` once in the frontend layout. See the
 equiviq.com integration for a complete example.
+
+## Lead generation
+
+The saved Guides API URL and key also authorize lead submissions. The plugin
+adds **Equiviq → Lead Generation** CTA records and an **Equiviq Lead Form**
+page block. Configure fields, acquisition text, visitor messages, and a
+privacy policy URL, then place the CTA in a block. Email is always required;
+organization is required whenever shown. Set a site privacy policy URL in
+Equiviq connection settings or override it on the CTA.
+
+The host renders `EquiviqLeadForm` from `@equiviq/payload-guides/lead-form` for
+the page block. The equiviq.com `PageLayout` is the reference adapter. The
+component submits to the Payload endpoint on the same site; the plugin checks
+the tenant work-email domain and forwards to Equiviq with the server-side key.
+The full page URL including query string is sent as the referring URL. No
+Equiviq-hosted form or site-owner Cloudflare setup is used.
+
+Temporary failures enter **Equiviq → Undelivered leads** with a stable
+submission ID. Reading a CTA retries one due item with backoff, so published
+form traffic drives automatic retries. Permanently rejected items stay visible
+for administrator review. The authenticated
+`POST /api/equiviq-lead-ctas/retry` endpoint also retries the current batch.
+Newsletter, ticket, and task actions remain disabled.
 
 Article URLs use readable slugs ending in the stable Equiviq article UUID.
 The index supports full-text search through Equiviq Payload 0.1.2 or later.

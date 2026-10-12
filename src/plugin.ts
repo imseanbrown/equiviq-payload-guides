@@ -1,5 +1,6 @@
 import type { Block, CollectionConfig, Config, GlobalConfig } from 'payload'
 import { decryptGuideKey, encryptGuideKey } from './credentials'
+import { createLeadCTACollection, equiviqLeadBlock, equiviqLeadQueue } from './leads'
 
 export type EquiviqGuidesOptions = {
   /** Name of the server environment variable containing the HTTPS guide list API URL. */
@@ -39,8 +40,8 @@ export const equiviqGuidesBlock: Block = {
 
 export const equiviqGuidesSettings: GlobalConfig = {
   slug: 'equiviq-guides-settings',
-  label: 'Equiviq Guides',
-  admin: { description: 'Connect to Equiviq, then place an Equiviq Guides block on a published page. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active.' },
+  label: 'Knowledge & Connection',
+  admin: { group: 'Equiviq', description: 'Connect to Equiviq, then place a Guides or Lead Form block on a published page. The API key is encrypted and is never displayed again after saving. If these fields are empty, an existing server-secret connection remains active.' },
   access: { read: ({ req }) => Boolean(req.user), update: ({ req }) => Boolean(req.user) },
   endpoints: [{ path: '/test-connection', method: 'post', handler: async (req) => {
     if (!req.user) return Response.json({ message: 'Sign in to test the connection.' }, { status: 401 })
@@ -77,6 +78,8 @@ export const equiviqGuidesSettings: GlobalConfig = {
     return data
   }] },
   fields: [
+  { name: 'privacyPolicyUrl', label: 'Site privacy policy URL', type: 'text', admin: { description: 'Used by lead forms unless a CTA overrides it. Forms require a privacy policy link.' },
+    validate: (value: unknown) => !value || (typeof value === 'string' && /^https:\/\/[^\s/]+(?:\/[^\s]*)?$/i.test(value)) ? true : 'Enter an HTTPS privacy policy URL.' },
   { name: 'apiUrl', label: 'Equiviq API URL', type: 'text', admin: { description: 'Paste the HTTPS Guides API URL from the Equiviq Payload plugin settings.' },
     validate: (value: unknown) => {
       if (!value) return true
@@ -111,12 +114,12 @@ export function equiviqGuidesPlugin(options: EquiviqGuidesOptions) {
       found = true
       const layout = collection.fields.find((field) => 'name' in field && field.name === 'layout')
       if (!layout || layout.type !== 'blocks') throw new Error(`${pageSlug}.layout must be a blocks field`)
-      return { ...collection, fields: collection.fields.map((field) => field === layout ? { ...layout, blocks: [...layout.blocks, equiviqGuidesBlock] } : field) }
+      return { ...collection, fields: collection.fields.map((field) => field === layout ? { ...layout, blocks: [...layout.blocks, equiviqGuidesBlock, equiviqLeadBlock] } : field) }
     })
     if (!found) throw new Error(`Equiviq Guides page collection ${pageSlug} was not found`)
     return {
       ...config,
-      collections,
+      collections: [...collections, createLeadCTACollection(options), equiviqLeadQueue],
       globals: [...(config.globals || []), equiviqGuidesSettings],
       custom: { ...config.custom, equiviqGuides: { apiUrlEnv: options.apiUrlEnv, apiKeyEnv: options.apiKeyEnv } },
     }

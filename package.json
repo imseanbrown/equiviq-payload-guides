@@ -1,23 +1,65 @@
 {
   "name": "@equiviq/payload-guides",
-  "version": "0.2.3",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
-  "files": ["dist", "assets", "README.md"],
-  "scripts": { "build": "node scripts/build.mjs && tsc -p tsconfig.build.json" },
+  "files": [
+    "dist",
+    "assets",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc -p tsconfig.build.json"
+  },
   "exports": {
-    ".": { "types": "./dist/types/plugin.d.ts", "import": "./dist/plugin.js" },
-    "./server": { "types": "./dist/types/server.d.ts", "import": "./dist/server.js" },
-    "./components": { "types": "./dist/types/components.d.ts", "import": "./dist/components.js" },
-    "./filters": { "types": "./dist/types/filters.d.ts", "import": "./dist/filters.js" },
-    "./view-tracker": { "types": "./dist/types/view-tracker.d.ts", "import": "./dist/view-tracker.js" },
-    "./facet-field": { "types": "./dist/types/facet-field.d.ts", "import": "./dist/facet-field.js" },
-    "./connection-test": { "types": "./dist/types/connection-test.d.ts", "import": "./dist/connection-test.js" },
+    ".": {
+      "types": "./dist/types/plugin.d.ts",
+      "import": "./dist/plugin.js"
+    },
+    "./server": {
+      "types": "./dist/types/server.d.ts",
+      "import": "./dist/server.js"
+    },
+    "./leads": {
+      "types": "./dist/types/leads.d.ts",
+      "import": "./dist/leads.js"
+    },
+    "./lead-form": {
+      "types": "./dist/types/lead-form.d.ts",
+      "import": "./dist/lead-form.js"
+    },
+    "./components": {
+      "types": "./dist/types/components.d.ts",
+      "import": "./dist/components.js"
+    },
+    "./filters": {
+      "types": "./dist/types/filters.d.ts",
+      "import": "./dist/filters.js"
+    },
+    "./view-tracker": {
+      "types": "./dist/types/view-tracker.d.ts",
+      "import": "./dist/view-tracker.js"
+    },
+    "./facet-field": {
+      "types": "./dist/types/facet-field.d.ts",
+      "import": "./dist/facet-field.js"
+    },
+    "./connection-test": {
+      "types": "./dist/types/connection-test.d.ts",
+      "import": "./dist/connection-test.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./assets/*": "./assets/*"
   },
-  "dependencies": { "react-markdown": "^10.0.0", "remark-gfm": "^4.0.0" },
-  "devDependencies": { "esbuild": "^0.25.12", "typescript": "^5.7.3" },
+  "dependencies": {
+    "libphonenumber-js": "^1.13.15",
+    "react-markdown": "^10.0.0",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12",
+    "typescript": "^5.7.3"
+  },
   "peerDependencies": {
     "next": "^16.0.0",
     "payload": "^3.90.0",

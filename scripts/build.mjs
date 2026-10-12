@@ -14,9 +14,9 @@ const shared = {
 
 await mkdir('dist', { recursive: true })
 await build({ ...shared, entryPoints: {
-  plugin: 'src/plugin.ts', server: 'src/server.ts', filters: 'src/filters.ts', components: 'src/components.tsx',
+  plugin: 'src/plugin.ts', server: 'src/server.ts', filters: 'src/filters.ts', components: 'src/components.tsx', leads: 'src/leads.ts',
 } })
 await build({ ...shared, banner: { js: "'use client';" }, entryPoints: {
-  'facet-field': 'src/facet-field.tsx', 'connection-test': 'src/connection-test.tsx', 'view-tracker': 'src/view-tracker.tsx',
+  'facet-field': 'src/facet-field.tsx', 'connection-test': 'src/connection-test.tsx', 'view-tracker': 'src/view-tracker.tsx', 'lead-form': 'src/lead-form.tsx',
 } })
 await cp('src/styles.css', 'dist/styles.css')
